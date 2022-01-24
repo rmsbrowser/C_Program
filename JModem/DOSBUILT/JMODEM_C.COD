@@ -1,0 +1,330 @@
+;	Static Name Aliases
+;
+	TITLE   JMODEM_c.C
+	.8087
+INCLUDELIB	SLIBCE
+_TEXT	SEGMENT  WORD PUBLIC 'CODE'
+_TEXT	ENDS
+_DATA	SEGMENT  WORD PUBLIC 'DATA'
+_DATA	ENDS
+CONST	SEGMENT  WORD PUBLIC 'CONST'
+CONST	ENDS
+_BSS	SEGMENT  WORD PUBLIC 'BSS'
+_BSS	ENDS
+DGROUP	GROUP	CONST, _BSS, _DATA
+	ASSUME DS: DGROUP, SS: DGROUP
+EXTRN	_remove:NEAR
+EXTRN	_rename:NEAR
+EXTRN	_close:NEAR
+EXTRN	_open:NEAR
+EXTRN	__aNchkstk:NEAR
+EXTRN	_read:NEAR
+EXTRN	_write:NEAR
+EXTRN	_screen:NEAR
+EXTRN	_strchr:NEAR
+EXTRN	__dos_findfirst:NEAR
+EXTRN	_strcpy:NEAR
+EXTRN	_syst:BYTE
+_BSS      SEGMENT
+COMM NEAR	_o_file:	BYTE:	 44
+_BSS      ENDS
+_DATA      SEGMENT
+$SG341	DB	'.OLD',  00H
+_DATA      ENDS
+_TEXT      SEGMENT
+	ASSUME	CS: _TEXT
+; Line 1
+; Line 13
+; Line 14
+; Line 15
+; Line 16
+; Line 17
+; Line 18
+; Line 40
+	PUBLIC	_file_io
+_file_io	PROC NEAR
+	*** 000000	55 			push	bp
+	*** 000001	8b ec 			mov	bp,sp
+	*** 000003	b8 46 00 		mov	ax,70
+	*** 000006	e8 00 00 		call	__aNchkstk
+;	temp = -66
+;	dot = -68
+;	error = -70
+;	len = 10
+;	buffer = 8
+;	handle = 6
+;	command = 4
+; Line 48
+	*** 000009	8b 46 04 		mov	ax,WORD PTR [bp+4]	;command
+	*** 00000c	e9 97 01 		jmp	$S333
+; Line 49
+	*** 00000f	90 			nop	
+; Line 53
+					$SC337:
+; Line 54
+; Line 55
+	*** 000010	8b 5e 08 		mov	bx,WORD PTR [bp+8]	;buffer
+	*** 000013	ff 37 			push	WORD PTR [bx]
+	*** 000015	2b c0 			sub	ax,ax
+	*** 000017	50 			push	ax
+	*** 000018	b9 05 00 		mov	cx,5
+	*** 00001b	51 			push	cx
+	*** 00001c	e8 00 00 		call	_screen
+	*** 00001f	83 c4 06 		add	sp,6
+; Line 56
+	*** 000022	b8 00 80 		mov	ax,-32768
+	*** 000025	50 			push	ax
+	*** 000026	8b 5e 08 		mov	bx,WORD PTR [bp+8]	;buffer
+	*** 000029	ff 37 			push	WORD PTR [bx]
+	*** 00002b	e8 00 00 		call	_open
+	*** 00002e	83 c4 04 		add	sp,4
+	*** 000031	8b 5e 06 		mov	bx,WORD PTR [bp+6]	;handle
+	*** 000034	89 07 			mov	WORD PTR [bx],ax
+	*** 000036	3d ff ff 		cmp	ax,-1
+	*** 000039	74 37 			je	$I338
+; Line 57
+; Line 58
+	*** 00003b	b8 00 00 		mov	ax,OFFSET DGROUP:_o_file
+	*** 00003e	50 			push	ax
+	*** 00003f	2b c0 			sub	ax,ax
+	*** 000041	50 			push	ax
+	*** 000042	8b 5e 08 		mov	bx,WORD PTR [bp+8]	;buffer
+	*** 000045	ff 37 			push	WORD PTR [bx]
+	*** 000047	e8 00 00 		call	__dos_findfirst
+	*** 00004a	83 c4 06 		add	sp,6
+; Line 59
+	*** 00004d	a1 1a 00 		mov	ax,WORD PTR _o_file+26
+	*** 000050	8b 16 1c 00 		mov	dx,WORD PTR _o_file+28
+	*** 000054	a3 04 00 		mov	WORD PTR _syst+4,ax
+	*** 000057	89 16 06 00 		mov	WORD PTR _syst+6,dx
+; Line 60
+	*** 00005b	2b c0 			sub	ax,ax
+	*** 00005d	50 			push	ax
+	*** 00005e	b8 00 00 		mov	ax,OFFSET _syst
+					$L20002:
+	*** 000061	50 			push	ax
+	*** 000062	b8 06 00 		mov	ax,6
+	*** 000065	50 			push	ax
+	*** 000066	e8 00 00 		call	_screen
+	*** 000069	83 c4 06 		add	sp,6
+; Line 61
+	*** 00006c	2b c0 			sub	ax,ax
+	*** 00006e	8b e5 			mov	sp,bp
+	*** 000070	5d 			pop	bp
+	*** 000071	c3 			ret	
+; Line 62
+; Line 63
+					$I338:
+	*** 000072	2b c0 			sub	ax,ax
+	*** 000074	50 			push	ax
+	*** 000075	50 			push	ax
+	*** 000076	b8 07 00 		mov	ax,7
+	*** 000079	50 			push	ax
+	*** 00007a	e8 00 00 		call	_screen
+	*** 00007d	83 c4 06 		add	sp,6
+; Line 64
+	*** 000080	b8 01 00 		mov	ax,1
+	*** 000083	8b e5 			mov	sp,bp
+	*** 000085	5d 			pop	bp
+	*** 000086	c3 			ret	
+; Line 65
+	*** 000087	90 			nop	
+; Line 69
+					$SC339:
+; Line 70
+; Line 71
+	*** 000088	8b 5e 08 		mov	bx,WORD PTR [bp+8]	;buffer
+	*** 00008b	ff 37 			push	WORD PTR [bx]
+	*** 00008d	2b c0 			sub	ax,ax
+	*** 00008f	50 			push	ax
+	*** 000090	b9 05 00 		mov	cx,5
+	*** 000093	51 			push	cx
+	*** 000094	e8 00 00 		call	_screen
+	*** 000097	83 c4 06 		add	sp,6
+; Line 72
+	*** 00009a	b8 00 80 		mov	ax,-32768
+	*** 00009d	50 			push	ax
+	*** 00009e	8b 5e 08 		mov	bx,WORD PTR [bp+8]	;buffer
+	*** 0000a1	ff 37 			push	WORD PTR [bx]
+	*** 0000a3	e8 00 00 		call	_open
+	*** 0000a6	83 c4 04 		add	sp,4
+	*** 0000a9	8b 5e 06 		mov	bx,WORD PTR [bp+6]	;handle
+	*** 0000ac	89 07 			mov	WORD PTR [bx],ax
+	*** 0000ae	3d ff ff 		cmp	ax,-1
+	*** 0000b1	74 72 			je	$I340
+; Line 73
+; Line 74
+	*** 0000b3	50 			push	ax
+	*** 0000b4	e8 00 00 		call	_close
+	*** 0000b7	83 c4 02 		add	sp,2
+; Line 75
+	*** 0000ba	8b 5e 08 		mov	bx,WORD PTR [bp+8]	;buffer
+	*** 0000bd	ff 37 			push	WORD PTR [bx]
+	*** 0000bf	8d 46 be 		lea	ax,WORD PTR [bp-66]	;temp
+	*** 0000c2	50 			push	ax
+	*** 0000c3	e8 00 00 		call	_strcpy
+	*** 0000c6	83 c4 04 		add	sp,4
+; Line 77
+	*** 0000c9	b8 00 00 		mov	ax,OFFSET DGROUP:$SG341
+	*** 0000cc	50 			push	ax
+	*** 0000cd	b8 2e 00 		mov	ax,46
+	*** 0000d0	50 			push	ax
+	*** 0000d1	8d 46 be 		lea	ax,WORD PTR [bp-66]	;temp
+	*** 0000d4	50 			push	ax
+	*** 0000d5	e8 00 00 		call	_strchr
+	*** 0000d8	83 c4 04 		add	sp,4
+	*** 0000db	89 46 bc 		mov	WORD PTR [bp-68],ax	;dot
+	*** 0000de	50 			push	ax
+	*** 0000df	e8 00 00 		call	_strcpy
+	*** 0000e2	83 c4 04 		add	sp,4
+; Line 79
+	*** 0000e5	8d 46 be 		lea	ax,WORD PTR [bp-66]	;temp
+	*** 0000e8	50 			push	ax
+	*** 0000e9	8b 5e 08 		mov	bx,WORD PTR [bp+8]	;buffer
+	*** 0000ec	ff 37 			push	WORD PTR [bx]
+	*** 0000ee	e8 00 00 		call	_rename
+	*** 0000f1	83 c4 04 		add	sp,4
+	*** 0000f4	89 46 ba 		mov	WORD PTR [bp-70],ax	;error
+	*** 0000f7	0b c0 			or	ax,ax
+	*** 0000f9	74 19 			je	$I342
+; Line 80
+; Line 81
+	*** 0000fb	8d 46 be 		lea	ax,WORD PTR [bp-66]	;temp
+	*** 0000fe	50 			push	ax
+	*** 0000ff	2b c0 			sub	ax,ax
+	*** 000101	50 			push	ax
+	*** 000102	b8 08 00 		mov	ax,8
+	*** 000105	50 			push	ax
+	*** 000106	e8 00 00 		call	_screen
+	*** 000109	83 c4 06 		add	sp,6
+; Line 82
+	*** 00010c	b8 02 00 		mov	ax,2
+	*** 00010f	8b e5 			mov	sp,bp
+	*** 000111	5d 			pop	bp
+	*** 000112	c3 			ret	
+	*** 000113	90 			nop	
+					$I342:
+; Line 85
+; Line 86
+	*** 000114	8d 46 be 		lea	ax,WORD PTR [bp-66]	;temp
+	*** 000117	50 			push	ax
+	*** 000118	2b c0 			sub	ax,ax
+	*** 00011a	50 			push	ax
+	*** 00011b	b8 09 00 		mov	ax,9
+	*** 00011e	50 			push	ax
+	*** 00011f	e8 00 00 		call	_screen
+	*** 000122	83 c4 06 		add	sp,6
+; Line 87
+; Line 88
+; Line 99
+					$I340:
+; Line 105
+	*** 000125	b8 80 01 		mov	ax,384
+	*** 000128	50 			push	ax
+	*** 000129	b8 02 81 		mov	ax,-32510
+	*** 00012c	50 			push	ax
+	*** 00012d	8b 5e 08 		mov	bx,WORD PTR [bp+8]	;buffer
+	*** 000130	ff 37 			push	WORD PTR [bx]
+	*** 000132	e8 00 00 		call	_open
+	*** 000135	83 c4 06 		add	sp,6
+	*** 000138	8b 5e 06 		mov	bx,WORD PTR [bp+6]	;handle
+	*** 00013b	89 07 			mov	WORD PTR [bx],ax
+	*** 00013d	3d ff ff 		cmp	ax,-1
+	*** 000140	74 0a 			je	$I344
+; Line 106
+; Line 107
+	*** 000142	8d 46 be 		lea	ax,WORD PTR [bp-66]	;temp
+	*** 000145	50 			push	ax
+	*** 000146	2b c0 			sub	ax,ax
+	*** 000148	e9 16 ff 		jmp	$L20002
+	*** 00014b	90 			nop	
+					$I344:
+; Line 111
+; Line 112
+	*** 00014c	8d 46 be 		lea	ax,WORD PTR [bp-66]	;temp
+	*** 00014f	50 			push	ax
+	*** 000150	2b c0 			sub	ax,ax
+	*** 000152	50 			push	ax
+	*** 000153	b8 08 00 		mov	ax,8
+	*** 000156	50 			push	ax
+	*** 000157	e8 00 00 		call	_screen
+	*** 00015a	83 c4 06 		add	sp,6
+; Line 113
+	*** 00015d	b8 03 00 		mov	ax,3
+	*** 000160	8b e5 			mov	sp,bp
+	*** 000162	5d 			pop	bp
+	*** 000163	c3 			ret	
+; Line 114
+; Line 115
+; Line 119
+					$SC346:
+; Line 120
+; Line 121
+	*** 000164	ff 76 0a 		push	WORD PTR [bp+10]	;len
+	*** 000167	8b 5e 08 		mov	bx,WORD PTR [bp+8]	;buffer
+	*** 00016a	ff 37 			push	WORD PTR [bx]
+	*** 00016c	8b 5e 06 		mov	bx,WORD PTR [bp+6]	;handle
+	*** 00016f	ff 37 			push	WORD PTR [bx]
+	*** 000171	e8 00 00 		call	_write
+					$L20003:
+	*** 000174	83 c4 06 		add	sp,6
+	*** 000177	8b e5 			mov	sp,bp
+	*** 000179	5d 			pop	bp
+	*** 00017a	c3 			ret	
+; Line 122
+	*** 00017b	90 			nop	
+; Line 126
+					$SC347:
+; Line 127
+; Line 128
+	*** 00017c	ff 76 0a 		push	WORD PTR [bp+10]	;len
+	*** 00017f	8b 5e 08 		mov	bx,WORD PTR [bp+8]	;buffer
+	*** 000182	ff 37 			push	WORD PTR [bx]
+	*** 000184	8b 5e 06 		mov	bx,WORD PTR [bp+6]	;handle
+	*** 000187	ff 37 			push	WORD PTR [bx]
+	*** 000189	e8 00 00 		call	_read
+	*** 00018c	eb e6 			jmp	SHORT $L20003
+; Line 129
+; Line 133
+					$SC348:
+; Line 134
+; Line 135
+	*** 00018e	8b 5e 06 		mov	bx,WORD PTR [bp+6]	;handle
+	*** 000191	ff 37 			push	WORD PTR [bx]
+	*** 000193	e8 00 00 		call	_close
+					$L20004:
+	*** 000196	83 c4 02 		add	sp,2
+	*** 000199	eb 25 			jmp	SHORT $SB334
+; Line 136
+	*** 00019b	90 			nop	
+; Line 140
+					$SC349:
+; Line 141
+; Line 142
+	*** 00019c	8b 5e 08 		mov	bx,WORD PTR [bp+8]	;buffer
+	*** 00019f	ff 37 			push	WORD PTR [bx]
+	*** 0001a1	e8 00 00 		call	_remove
+	*** 0001a4	eb f0 			jmp	SHORT $L20004
+					$S333:
+	*** 0001a6	48 			dec	ax
+	*** 0001a7	3d 05 00 		cmp	ax,5
+	*** 0001aa	77 14 			ja	$SB334
+	*** 0001ac	d1 e0 			shl	ax,1
+	*** 0001ae	93 			xchg	ax,bx
+	*** 0001af	2e ff a7 b4 01 		jmp	WORD PTR cs:$L20001[bx]
+					$L20001:
+	*** 0001b4	10 00 				DW	$SC337
+	*** 0001b6	88 00 				DW	$SC339
+	*** 0001b8	64 01 				DW	$SC346
+	*** 0001ba	8e 01 				DW	$SC348
+	*** 0001bc	9c 01 				DW	$SC349
+	*** 0001be	7c 01 				DW	$SC347
+					$SB334:
+; Line 145
+	*** 0001c0	8b e5 			mov	sp,bp
+	*** 0001c2	5d 			pop	bp
+	*** 0001c3	c3 			ret	
+
+_file_io	ENDP
+_TEXT	ENDS
+END

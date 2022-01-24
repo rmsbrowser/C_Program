@@ -1,0 +1,580 @@
+;	Static Name Aliases
+;
+	TITLE   JMODEM_e.C
+	.8087
+INCLUDELIB	SLIBCE
+_TEXT	SEGMENT  WORD PUBLIC 'CODE'
+_TEXT	ENDS
+_DATA	SEGMENT  WORD PUBLIC 'DATA'
+_DATA	ENDS
+CONST	SEGMENT  WORD PUBLIC 'CONST'
+CONST	ENDS
+_BSS	SEGMENT  WORD PUBLIC 'BSS'
+_BSS	ENDS
+DGROUP	GROUP	CONST, _BSS, _DATA
+	ASSUME DS: DGROUP, SS: DGROUP
+PUBLIC  _port_pars
+EXTRN	__dos_getvect:NEAR
+EXTRN	__dos_setvect:NEAR
+EXTRN	__chain_intr:NEAR
+_BSS      SEGMENT
+COMM NEAR	_port:	BYTE:	 2
+COMM NEAR	_timer:	BYTE:	 2
+_BSS      ENDS
+EXTRN	_int_buffer:WORD
+EXTRN	_user_abort:WORD
+_BSS      SEGMENT
+COMM NEAR	_write_ptr:	BYTE:	 2
+COMM NEAR	_read_ptr:	BYTE:	 2
+COMM NEAR	_old_mask:	BYTE:	 2
+COMM NEAR	_old_ier:	BYTE:	 2
+COMM NEAR	_old_mcr:	BYTE:	 2
+COMM NEAR	_old_stat:	BYTE:	 2
+COMM NEAR	_hardware_port:	BYTE:	 2
+COMM NEAR	_old_tim:	BYTE:	 4
+COMM NEAR	_old_com:	BYTE:	 4
+COMM NEAR	_old_brk:	BYTE:	 4
+_BSS      ENDS
+_DATA      SEGMENT
+_port_pars	DW	03f8H
+	DW	0efH
+	DW	0cH
+	DW	02f8H
+	DW	0f7H
+	DW	0bH
+	DW	03e8H
+	DW	0efH
+	DW	0cH
+	DW	02e8H
+	DW	0f7H
+	DW	0bH
+_DATA      ENDS
+_TEXT      SEGMENT
+	ASSUME	CS: _TEXT
+; Line 1
+; Line 27
+; Line 28
+; Line 29
+; Line 30
+; Line 31
+; Line 32
+; Line 90
+	PUBLIC	_open_chan
+_open_chan	PROC NEAR
+	*** 000000	55 			push	bp
+	*** 000001	8b ec 			mov	bp,sp
+	*** 000003	83 ec 02 		sub	sp,2
+	*** 000006	56 			push	si
+;	i = -2
+;	user_port = 4
+; Line 93
+	*** 000007	e8 00 00 		call	_flush
+; Line 95
+	*** 00000a	8b 5e 04 		mov	bx,WORD PTR [bp+4]	;user_port
+	*** 00000d	8b c3 			mov	ax,bx
+	*** 00000f	d1 e3 			shl	bx,1
+	*** 000011	03 d8 			add	bx,ax
+	*** 000013	d1 e3 			shl	bx,1
+	*** 000015	8b 87 00 00 		mov	ax,WORD PTR _port_pars[bx]
+	*** 000019	a3 00 00 		mov	WORD PTR _hardware_port,ax
+; Line 96
+	*** 00001c	8b c8 			mov	cx,ax
+	*** 00001e	8b d0 			mov	dx,ax
+	*** 000020	83 c2 04 		add	dx,4
+	*** 000023	b8 0f 00 		mov	ax,15
+	*** 000026	ee 			out	dx, al
+
+; Line 97
+	*** 000027	8b c2 			mov	ax,dx
+	*** 000029	8b d1 			mov	dx,cx
+	*** 00002b	42 			inc	dx
+	*** 00002c	8b c8 			mov	cx,ax
+	*** 00002e	ec 			in	al,dx
+	*** 00002f	2a e4 			sub	ah,ah
+	*** 000031	a3 00 00 		mov	WORD PTR _old_ier,ax
+; Line 98
+	*** 000034	8b d1 			mov	dx,cx
+	*** 000036	ec 			in	al,dx
+	*** 000037	a3 00 00 		mov	WORD PTR _old_mcr,ax
+; Line 99
+	*** 00003a	b8 1b 00 		mov	ax,27
+	*** 00003d	50 			push	ax
+	*** 00003e	8b f3 			mov	si,bx
+	*** 000040	e8 00 00 		call	__dos_getvect
+	*** 000043	83 c4 02 		add	sp,2
+	*** 000046	a3 00 00 		mov	WORD PTR _old_brk,ax
+	*** 000049	89 16 02 00 		mov	WORD PTR _old_brk+2,dx
+; Line 100
+	*** 00004d	b8 00 00 		mov	ax,OFFSET _fatal_abort
+	*** 000050	ba 00 00 		mov	dx,SEG _fatal_abort
+	*** 000053	52 			push	dx
+	*** 000054	50 			push	ax
+	*** 000055	b9 1b 00 		mov	cx,27
+	*** 000058	51 			push	cx
+	*** 000059	e8 00 00 		call	__dos_setvect
+	*** 00005c	83 c4 06 		add	sp,6
+; Line 101
+	*** 00005f	b8 00 00 		mov	ax,OFFSET _fatal_abort
+	*** 000062	ba 00 00 		mov	dx,SEG _fatal_abort
+	*** 000065	52 			push	dx
+	*** 000066	50 			push	ax
+	*** 000067	b8 23 00 		mov	ax,35
+	*** 00006a	50 			push	ax
+	*** 00006b	e8 00 00 		call	__dos_setvect
+	*** 00006e	83 c4 06 		add	sp,6
+; Line 102
+	*** 000071	e4 21 			in	al,33
+	*** 000073	2a e4 			sub	ah,ah
+	*** 000075	a3 00 00 		mov	WORD PTR _old_mask,ax
+; Line 103
+	*** 000078	b8 1c 00 		mov	ax,28
+	*** 00007b	50 			push	ax
+	*** 00007c	e8 00 00 		call	__dos_getvect
+	*** 00007f	83 c4 02 		add	sp,2
+	*** 000082	a3 00 00 		mov	WORD PTR _old_tim,ax
+	*** 000085	89 16 02 00 		mov	WORD PTR _old_tim+2,dx
+; Line 105
+	*** 000089	ff b4 04 00 		push	WORD PTR _port_pars[si+4]
+	*** 00008d	e8 00 00 		call	__dos_getvect
+	*** 000090	83 c4 02 		add	sp,2
+	*** 000093	a3 00 00 		mov	WORD PTR _old_com,ax
+	*** 000096	89 16 02 00 		mov	WORD PTR _old_com+2,dx
+; Line 106
+	*** 00009a	b8 00 00 		mov	ax,OFFSET _tim_int
+	*** 00009d	ba 00 00 		mov	dx,SEG _tim_int
+	*** 0000a0	52 			push	dx
+	*** 0000a1	50 			push	ax
+	*** 0000a2	b8 1c 00 		mov	ax,28
+	*** 0000a5	50 			push	ax
+	*** 0000a6	e8 00 00 		call	__dos_setvect
+	*** 0000a9	83 c4 06 		add	sp,6
+; Line 109
+	*** 0000ac	b8 00 00 		mov	ax,OFFSET _com_int
+	*** 0000af	ba 00 00 		mov	dx,SEG _com_int
+	*** 0000b2	52 			push	dx
+	*** 0000b3	50 			push	ax
+	*** 0000b4	ff b4 04 00 		push	WORD PTR _port_pars[si+4]
+	*** 0000b8	e8 00 00 		call	__dos_setvect
+	*** 0000bb	83 c4 06 		add	sp,6
+; Line 111
+	*** 0000be	8b 84 02 00 		mov	ax,WORD PTR _port_pars[si+2]
+	*** 0000c2	23 06 00 00 		and	ax,WORD PTR _old_mask
+	*** 0000c6	e6 21 			out	33, al
+
+; Line 112
+	*** 0000c8	b8 01 00 		mov	ax,1
+	*** 0000cb	8b 16 00 00 		mov	dx,WORD PTR _hardware_port
+	*** 0000cf	03 d0 			add	dx,ax
+	*** 0000d1	ee 			out	dx, al
+
+; Line 113
+	*** 0000d2	c7 46 fe 00 00 		mov	WORD PTR [bp-2],0	;i
+					$FC286:
+; Line 114
+; Line 115
+	*** 0000d7	b8 20 00 		mov	ax,32
+	*** 0000da	8b d0 			mov	dx,ax
+	*** 0000dc	ee 			out	dx, al
+
+; Line 116
+	*** 0000dd	8b 56 fe 		mov	dx,WORD PTR [bp-2]	;i
+	*** 0000e0	03 16 00 00 		add	dx,WORD PTR _hardware_port
+	*** 0000e4	ec 			in	al,dx
+; Line 117
+	*** 0000e5	ff 46 fe 		inc	WORD PTR [bp-2]	;i
+	*** 0000e8	83 7e fe 08 		cmp	WORD PTR [bp-2],8	;i
+	*** 0000ec	7c e9 			jl	$FC286
+; Line 118
+	*** 0000ee	b8 20 00 		mov	ax,32
+	*** 0000f1	8b d0 			mov	dx,ax
+	*** 0000f3	ee 			out	dx, al
+
+; Line 119
+	*** 0000f4	e8 00 00 		call	_flush
+; Line 121
+	*** 0000f7	8b 16 00 00 		mov	dx,WORD PTR _hardware_port
+	*** 0000fb	83 c2 06 		add	dx,6
+	*** 0000fe	ec 			in	al,dx
+	*** 0000ff	25 f0 00 		and	ax,240
+	*** 000102	a3 00 00 		mov	WORD PTR _old_stat,ax
+; Line 122
+	*** 000105	2b c0 			sub	ax,ax
+; Line 123
+	*** 000107	5e 			pop	si
+	*** 000108	8b e5 			mov	sp,bp
+	*** 00010a	5d 			pop	bp
+	*** 00010b	c3 			ret	
+
+_open_chan	ENDP
+; Line 132
+	PUBLIC	_close_chan
+_close_chan	PROC NEAR
+	*** 00010c	55 			push	bp
+	*** 00010d	8b ec 			mov	bp,sp
+;	user_port = 4
+; Line 134
+	*** 00010f	a1 00 00 		mov	ax,WORD PTR _old_ier
+	*** 000112	8b 16 00 00 		mov	dx,WORD PTR _hardware_port
+	*** 000116	42 			inc	dx
+	*** 000117	ee 			out	dx, al
+
+; Line 135
+	*** 000118	a1 00 00 		mov	ax,WORD PTR _old_mask
+	*** 00011b	e6 21 			out	33, al
+
+; Line 138
+	*** 00011d	ff 36 02 00 		push	WORD PTR _old_com+2
+	*** 000121	ff 36 00 00 		push	WORD PTR _old_com
+	*** 000125	8b 5e 04 		mov	bx,WORD PTR [bp+4]	;user_port
+	*** 000128	8b c3 			mov	ax,bx
+	*** 00012a	d1 e3 			shl	bx,1
+	*** 00012c	03 d8 			add	bx,ax
+	*** 00012e	d1 e3 			shl	bx,1
+	*** 000130	ff b7 04 00 		push	WORD PTR _port_pars[bx+4]
+	*** 000134	e8 00 00 		call	__dos_setvect
+	*** 000137	8b e5 			mov	sp,bp
+; Line 139
+	*** 000139	ff 36 02 00 		push	WORD PTR _old_tim+2
+	*** 00013d	ff 36 00 00 		push	WORD PTR _old_tim
+	*** 000141	b8 1c 00 		mov	ax,28
+	*** 000144	50 			push	ax
+	*** 000145	e8 00 00 		call	__dos_setvect
+	*** 000148	8b e5 			mov	sp,bp
+; Line 140
+	*** 00014a	ff 36 02 00 		push	WORD PTR _old_brk+2
+	*** 00014e	ff 36 00 00 		push	WORD PTR _old_brk
+	*** 000152	b8 1b 00 		mov	ax,27
+	*** 000155	50 			push	ax
+	*** 000156	e8 00 00 		call	__dos_setvect
+; Line 141
+	*** 000159	2b c0 			sub	ax,ax
+; Line 142
+	*** 00015b	8b e5 			mov	sp,bp
+	*** 00015d	5d 			pop	bp
+	*** 00015e	c3 			ret	
+	*** 00015f	90 			nop	
+
+_close_chan	ENDP
+; Line 151
+	PUBLIC	_read_chan
+_read_chan	PROC NEAR
+	*** 000160	55 			push	bp
+	*** 000161	8b ec 			mov	bp,sp
+	*** 000163	83 ec 04 		sub	sp,4
+	*** 000166	57 			push	di
+	*** 000167	56 			push	si
+;	count = -2
+;	avail = -4
+;	buffer = 6
+;	bytes = 4
+; Line 156
+	*** 000168	c7 06 00 00 5a 00 	mov	WORD PTR _timer,90
+; Line 157
+	*** 00016e	8b 46 04 		mov	ax,WORD PTR [bp+4]	;bytes
+	*** 000171	89 46 fe 		mov	WORD PTR [bp-2],ax	;count
+; Line 159
+	*** 000174	eb 5b 			jmp	SHORT $L20001
+					$FC296:
+	*** 000176	83 3e 00 00 00 		cmp	WORD PTR _timer,0
+	*** 00017b	74 5a 			je	$FB297
+; Line 160
+; Line 162
+	*** 00017d	a1 00 00 		mov	ax,WORD PTR _write_ptr
+	*** 000180	2b 06 00 00 		sub	ax,WORD PTR _read_ptr
+	*** 000184	89 46 fc 		mov	WORD PTR [bp-4],ax	;avail
+	*** 000187	0b c0 			or	ax,ax
+	*** 000189	74 32 			je	$I298
+; Line 163
+; Line 164
+	*** 00018b	3b 46 fe 		cmp	ax,WORD PTR [bp-2]	;count
+	*** 00018e	76 06 			jbe	$I299
+; Line 165
+	*** 000190	8b 46 fe 		mov	ax,WORD PTR [bp-2]	;count
+	*** 000193	89 46 fc 		mov	WORD PTR [bp-4],ax	;avail
+; Line 166
+					$I299:
+; Line 168
+	*** 000196	a1 00 00 		mov	ax,WORD PTR _read_ptr
+	*** 000199	8b 4e fc 		mov	cx,WORD PTR [bp-4]	;avail
+	*** 00019c	51 			push	cx
+	*** 00019d	8b f0 			mov	si,ax
+	*** 00019f	1e 			push	ds
+	*** 0001a0	07 			pop	es
+	*** 0001a1	8b 7e 06 		mov	di,WORD PTR [bp+6]	;buffer
+	*** 0001a4	d1 e9 			shr	cx,1
+	*** 0001a6	f3 			rep
+	*** 0001a7	a5 			movsw
+	*** 0001a8	13 c9 			adc	cx,cx
+	*** 0001aa	f3 			rep
+	*** 0001ab	a4 			movsb
+	*** 0001ac	59 			pop	cx
+; Line 169
+	*** 0001ad	29 4e fe 		sub	WORD PTR [bp-2],cx	;count
+; Line 170
+	*** 0001b0	01 0e 00 00 		add	WORD PTR _read_ptr,cx
+; Line 171
+	*** 0001b4	01 4e 06 		add	WORD PTR [bp+6],cx	;buffer
+; Line 172
+	*** 0001b7	c7 06 00 00 5a 00 	mov	WORD PTR _timer,90
+; Line 173
+; Line 174
+					$I298:
+	*** 0001bd	fa 			cli	
+; Line 175
+	*** 0001be	a1 00 00 		mov	ax,WORD PTR _write_ptr
+	*** 0001c1	39 06 00 00 		cmp	WORD PTR _read_ptr,ax
+	*** 0001c5	75 09 			jne	$I300
+; Line 176
+; Line 178
+	*** 0001c7	a1 00 00 		mov	ax,WORD PTR _int_buffer
+	*** 0001ca	a3 00 00 		mov	WORD PTR _read_ptr,ax
+	*** 0001cd	a3 00 00 		mov	WORD PTR _write_ptr,ax
+; Line 179
+; Line 180
+					$I300:
+	*** 0001d0	fb 			sti	
+; Line 181
+					$L20001:
+	*** 0001d1	83 7e fe 00 		cmp	WORD PTR [bp-2],0	;count
+	*** 0001d5	75 9f 			jne	$FC296
+					$FB297:
+; Line 182
+	*** 0001d7	8b 46 04 		mov	ax,WORD PTR [bp+4]	;bytes
+	*** 0001da	2b 46 fe 		sub	ax,WORD PTR [bp-2]	;count
+; Line 183
+	*** 0001dd	5e 			pop	si
+	*** 0001de	5f 			pop	di
+	*** 0001df	8b e5 			mov	sp,bp
+	*** 0001e1	5d 			pop	bp
+	*** 0001e2	c3 			ret	
+	*** 0001e3	90 			nop	
+
+_read_chan	ENDP
+; Line 188
+	PUBLIC	_flush
+_flush	PROC NEAR
+; Line 189
+	*** 0001e4	fa 			cli	
+; Line 191
+	*** 0001e5	a1 00 00 		mov	ax,WORD PTR _int_buffer
+	*** 0001e8	a3 00 00 		mov	WORD PTR _read_ptr,ax
+	*** 0001eb	a3 00 00 		mov	WORD PTR _write_ptr,ax
+; Line 192
+	*** 0001ee	fb 			sti	
+; Line 193
+	*** 0001ef	c3 			ret	
+
+_flush	ENDP
+; Line 200
+	PUBLIC	_write_chan
+_write_chan	PROC NEAR
+	*** 0001f0	55 			push	bp
+	*** 0001f1	8b ec 			mov	bp,sp
+	*** 0001f3	83 ec 02 		sub	sp,2
+;	status = -2
+;	buffer = 6
+;	bytes = 4
+	*** 0001f6	eb 51 			jmp	SHORT $L20004
+					$FC307:
+	*** 0001f8	83 3e 00 00 00 		cmp	WORD PTR _timer,0
+	*** 0001fd	74 56 			je	$FB308
+	*** 0001ff	83 3e 00 00 00 		cmp	WORD PTR _user_abort,0
+	*** 000204	75 4f 			jne	$FB308
+; Line 207
+; Line 208
+	*** 000206	eb 12 			jmp	SHORT $L20002
+					$FC310:
+; Line 209
+; Line 210
+	*** 000208	a8 80 			test	al,128
+	*** 00020a	75 0e 			jne	$L20002
+; Line 211
+; Line 212
+	*** 00020c	c7 06 00 00 ff ff 	mov	WORD PTR _user_abort,-1
+; Line 213
+	*** 000212	b8 07 00 		mov	ax,7
+	*** 000215	8b e5 			mov	sp,bp
+	*** 000217	5d 			pop	bp
+	*** 000218	c3 			ret	
+; Line 214
+; Line 215
+	*** 000219	90 			nop	
+					$L20002:
+	*** 00021a	8b 16 00 00 		mov	dx,WORD PTR _hardware_port
+	*** 00021e	83 c2 06 		add	dx,6
+	*** 000221	ec 			in	al,dx
+	*** 000222	25 f0 00 		and	ax,240
+	*** 000225	3b 06 00 00 		cmp	ax,WORD PTR _old_stat
+	*** 000229	75 dd 			jne	$FC310
+; Line 217
+	*** 00022b	8b 16 00 00 		mov	dx,WORD PTR _hardware_port
+	*** 00022f	83 c2 05 		add	dx,5
+	*** 000232	ec 			in	al,dx
+	*** 000233	2a e4 			sub	ah,ah
+	*** 000235	a8 20 			test	al,32
+	*** 000237	74 16 			je	$L20003
+; Line 218
+; Line 219
+	*** 000239	8b 5e 06 		mov	bx,WORD PTR [bp+6]	;buffer
+	*** 00023c	8a 07 			mov	al,BYTE PTR [bx]
+	*** 00023e	8b 16 00 00 		mov	dx,WORD PTR _hardware_port
+	*** 000242	ee 			out	dx, al
+
+	*** 000243	ff 46 06 		inc	WORD PTR [bp+6]	;buffer
+; Line 220
+	*** 000246	ff 4e 04 		dec	WORD PTR [bp+4]	;bytes
+; Line 221
+					$L20004:
+	*** 000249	c7 06 00 00 5a 00 	mov	WORD PTR _timer,90
+; Line 222
+; Line 223
+					$L20003:
+	*** 00024f	83 7e 04 00 		cmp	WORD PTR [bp+4],0	;bytes
+	*** 000253	75 a3 			jne	$FC307
+					$FB308:
+; Line 224
+	*** 000255	2b c0 			sub	ax,ax
+; Line 225
+	*** 000257	8b e5 			mov	sp,bp
+	*** 000259	5d 			pop	bp
+	*** 00025a	c3 			ret	
+	*** 00025b	90 			nop	
+
+_write_chan	ENDP
+; Line 234
+	PUBLIC	_com_int
+_com_int	PROC FAR
+	*** 00025c	50 			push	ax
+	*** 00025d	51 			push	cx
+	*** 00025e	52 			push	dx
+	*** 00025f	53 			push	bx
+	*** 000260	54 			push	sp
+	*** 000261	55 			push	bp
+	*** 000262	56 			push	si
+	*** 000263	57 			push	di
+	*** 000264	1e 			push	ds
+	*** 000265	06 			push	es
+	*** 000266	8b ec 			mov	bp,sp
+	*** 000268	b8 00 00 		mov	ax,DGROUP
+	*** 00026b	8e d8 			mov	ds,ax
+	ASSUME DS: DGROUP
+	*** 00026d	fc 			cld	
+; Line 236
+	*** 00026e	8b 16 00 00 		mov	dx,WORD PTR _hardware_port
+	*** 000272	ec 			in	al,dx
+	*** 000273	8b 1e 00 00 		mov	bx,WORD PTR _write_ptr
+	*** 000277	88 07 			mov	BYTE PTR [bx],al
+; Line 237
+	*** 000279	b8 20 00 		mov	ax,32
+	*** 00027c	8b d0 			mov	dx,ax
+	*** 00027e	ee 			out	dx, al
+
+; Line 238
+	*** 00027f	a1 00 00 		mov	ax,WORD PTR _int_buffer
+	*** 000282	80 c4 24 		add	ah,36
+	*** 000285	3b 06 00 00 		cmp	ax,WORD PTR _write_ptr
+	*** 000289	76 04 			jbe	$I315
+; Line 239
+	*** 00028b	ff 06 00 00 		inc	WORD PTR _write_ptr
+; Line 240
+					$I315:
+	*** 00028f	07 			pop	es
+	*** 000290	1f 			pop	ds
+	*** 000291	5f 			pop	di
+	*** 000292	5e 			pop	si
+	*** 000293	5d 			pop	bp
+	*** 000294	5b 			pop	bx
+	*** 000295	5b 			pop	bx
+	*** 000296	5a 			pop	dx
+	*** 000297	59 			pop	cx
+	*** 000298	58 			pop	ax
+	*** 000299	cf 			iret	
+
+_com_int	ENDP
+; Line 249
+	PUBLIC	_tim_int
+_tim_int	PROC FAR
+	*** 00029a	50 			push	ax
+	*** 00029b	51 			push	cx
+	*** 00029c	52 			push	dx
+	*** 00029d	53 			push	bx
+	*** 00029e	54 			push	sp
+	*** 00029f	55 			push	bp
+	*** 0002a0	56 			push	si
+	*** 0002a1	57 			push	di
+	*** 0002a2	1e 			push	ds
+	*** 0002a3	06 			push	es
+	*** 0002a4	8b ec 			mov	bp,sp
+	*** 0002a6	b8 00 00 		mov	ax,DGROUP
+	*** 0002a9	8e d8 			mov	ds,ax
+	ASSUME DS: DGROUP
+	*** 0002ab	fc 			cld	
+; Line 250
+	*** 0002ac	83 3e 00 00 00 		cmp	WORD PTR _timer,0
+	*** 0002b1	74 04 			je	$I317
+; Line 251
+	*** 0002b3	ff 0e 00 00 		dec	WORD PTR _timer
+; Line 252
+					$I317:
+	*** 0002b7	b8 20 00 		mov	ax,32
+	*** 0002ba	8b d0 			mov	dx,ax
+	*** 0002bc	ee 			out	dx, al
+
+; Line 253
+	*** 0002bd	fb 			sti	
+; Line 254
+	*** 0002be	ff 36 02 00 		push	WORD PTR _old_tim+2
+	*** 0002c2	ff 36 00 00 		push	WORD PTR _old_tim
+	*** 0002c6	e8 00 00 		call	__chain_intr
+; Line 255
+	*** 0002c9	8b e5 			mov	sp,bp
+	*** 0002cb	07 			pop	es
+	*** 0002cc	1f 			pop	ds
+	*** 0002cd	5f 			pop	di
+	*** 0002ce	5e 			pop	si
+	*** 0002cf	5d 			pop	bp
+	*** 0002d0	5b 			pop	bx
+	*** 0002d1	5b 			pop	bx
+	*** 0002d2	5a 			pop	dx
+	*** 0002d3	59 			pop	cx
+	*** 0002d4	58 			pop	ax
+	*** 0002d5	cf 			iret	
+
+_tim_int	ENDP
+; Line 264
+	PUBLIC	_fatal_abort
+_fatal_abort	PROC FAR
+	*** 0002d6	50 			push	ax
+	*** 0002d7	51 			push	cx
+	*** 0002d8	52 			push	dx
+	*** 0002d9	53 			push	bx
+	*** 0002da	54 			push	sp
+	*** 0002db	55 			push	bp
+	*** 0002dc	56 			push	si
+	*** 0002dd	57 			push	di
+	*** 0002de	1e 			push	ds
+	*** 0002df	06 			push	es
+	*** 0002e0	8b ec 			mov	bp,sp
+	*** 0002e2	b8 00 00 		mov	ax,DGROUP
+	*** 0002e5	8e d8 			mov	ds,ax
+	ASSUME DS: DGROUP
+	*** 0002e7	fc 			cld	
+; Line 265
+	*** 0002e8	c7 06 00 00 ff ff 	mov	WORD PTR _user_abort,-1
+; Line 266
+	*** 0002ee	07 			pop	es
+	*** 0002ef	1f 			pop	ds
+	*** 0002f0	5f 			pop	di
+	*** 0002f1	5e 			pop	si
+	*** 0002f2	5d 			pop	bp
+	*** 0002f3	5b 			pop	bx
+	*** 0002f4	5b 			pop	bx
+	*** 0002f5	5a 			pop	dx
+	*** 0002f6	59 			pop	cx
+	*** 0002f7	58 			pop	ax
+	*** 0002f8	cf 			iret	
+
+_fatal_abort	ENDP
+	*** 0002f9	90 			nop	
+_TEXT	ENDS
+END

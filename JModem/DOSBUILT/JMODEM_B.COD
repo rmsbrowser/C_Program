@@ -1,0 +1,234 @@
+;	Static Name Aliases
+;
+;	$S377_name	EQU	name
+;	$S386_funct	EQU	funct
+;	$S393_prt	EQU	prt
+	TITLE   JMODEM_b.C
+	.8087
+INCLUDELIB	SLIBCE
+_TEXT	SEGMENT  WORD PUBLIC 'CODE'
+_TEXT	ENDS
+_DATA	SEGMENT  WORD PUBLIC 'DATA'
+_DATA	ENDS
+CONST	SEGMENT  WORD PUBLIC 'CONST'
+CONST	ENDS
+_BSS	SEGMENT  WORD PUBLIC 'BSS'
+_BSS	ENDS
+DGROUP	GROUP	CONST, _BSS, _DATA
+	ASSUME DS: DGROUP, SS: DGROUP
+EXTRN	_malloc:NEAR
+EXTRN	_puts:NEAR
+EXTRN	_strcpy:NEAR
+EXTRN	__aNchkstk:NEAR
+_DATA      SEGMENT
+$SG370	DB	0aH, 'Memory allocation failed!',  00H
+_DATA      ENDS
+_BSS      SEGMENT
+	ORG	$+64
+$S386_funct	DB 03H DUP (?)
+	ORG	$+1
+$S393_prt	DB 03H DUP (?)
+	ORG	$-71
+$S377_name	DW 020H DUP (?)
+_BSS      ENDS
+_TEXT      SEGMENT
+	ASSUME	CS: _TEXT
+; Line 1
+; Line 15
+; Line 16
+; Line 17
+; Line 18
+; Line 19
+; Line 24
+	PUBLIC	_allocate_memory
+_allocate_memory	PROC NEAR
+	*** 000000	55 			push	bp
+	*** 000001	8b ec 			mov	bp,sp
+	*** 000003	b8 02 00 		mov	ax,2
+	*** 000006	e8 00 00 		call	__aNchkstk
+;	memory = -2
+;	buf_len = 4
+; Line 28
+	*** 000009	ff 76 04 		push	WORD PTR [bp+4]	;buf_len
+	*** 00000c	e8 00 00 		call	_malloc
+	*** 00000f	83 c4 02 		add	sp,2
+	*** 000012	89 46 fe 		mov	WORD PTR [bp-2],ax	;memory
+	*** 000015	0b c0 			or	ax,ax
+	*** 000017	75 07 			jne	$I369
+; Line 29
+	*** 000019	b8 00 00 		mov	ax,OFFSET DGROUP:$SG370
+	*** 00001c	50 			push	ax
+	*** 00001d	e8 00 00 		call	_puts
+; Line 30
+					$I369:
+	*** 000020	8b 46 fe 		mov	ax,WORD PTR [bp-2]	;memory
+; Line 31
+	*** 000023	8b e5 			mov	sp,bp
+	*** 000025	5d 			pop	bp
+	*** 000026	c3 			ret	
+	*** 000027	90 			nop	
+
+_allocate_memory	ENDP
+; Line 36
+	PUBLIC	_get_port
+_get_port	PROC NEAR
+	*** 000028	55 			push	bp
+	*** 000029	8b ec 			mov	bp,sp
+	*** 00002b	33 c0 			xor	ax,ax
+	*** 00002d	e8 00 00 		call	__aNchkstk
+;	prt_str = 4
+; Line 38
+	*** 000030	8a 46 04 		mov	al,BYTE PTR [bp+4]	;prt_str
+	*** 000033	98 			cbw	
+	*** 000034	2d 31 00 		sub	ax,49
+; Line 40
+	*** 000037	8b e5 			mov	sp,bp
+	*** 000039	5d 			pop	bp
+	*** 00003a	c3 			ret	
+	*** 00003b	90 			nop	
+
+_get_port	ENDP
+; Line 45
+	PUBLIC	_get_inp
+_get_inp	PROC NEAR
+	*** 00003c	55 			push	bp
+	*** 00003d	8b ec 			mov	bp,sp
+	*** 00003f	b8 02 00 		mov	ax,2
+	*** 000042	e8 00 00 		call	__aNchkstk
+;	i = -2
+;	argv = 6
+;	argc = 4
+; Line 48
+	*** 000045	c7 46 fe 00 00 		mov	WORD PTR [bp-2],0	;i
+; Line 50
+	*** 00004a	83 7e 04 03 		cmp	WORD PTR [bp+4],3	;argc
+	*** 00004e	72 3a 			jb	$I378
+; Line 51
+; Line 52
+	*** 000050	8b 5e 06 		mov	bx,WORD PTR [bp+6]	;argv
+	*** 000053	ff 77 04 		push	WORD PTR [bx+4]
+	*** 000056	b8 00 00 		mov	ax,OFFSET DGROUP:$S377_name
+	*** 000059	50 			push	ax
+	*** 00005a	e8 00 00 		call	_strcpy
+	*** 00005d	83 c4 04 		add	sp,4
+; Line 53
+	*** 000060	eb 16 			jmp	SHORT $L20001
+					$FC380:
+; Line 54
+; Line 56
+	*** 000062	80 bf 00 00 7a 		cmp	BYTE PTR $S377_name[bx],122
+	*** 000067	7f 0c 			jg	$I382
+	*** 000069	80 bf 00 00 61 		cmp	BYTE PTR $S377_name[bx],97
+	*** 00006e	7c 05 			jl	$I382
+; Line 57
+	*** 000070	80 a7 00 00 5f 		and	BYTE PTR $S377_name[bx],95
+; Line 58
+					$I382:
+	*** 000075	ff 46 fe 		inc	WORD PTR [bp-2]	;i
+; Line 59
+					$L20001:
+	*** 000078	8b 5e fe 		mov	bx,WORD PTR [bp-2]	;i
+	*** 00007b	80 bf 00 00 00 		cmp	BYTE PTR $S377_name[bx],0
+	*** 000080	75 e0 			jne	$FC380
+; Line 60
+	*** 000082	b8 00 00 		mov	ax,OFFSET DGROUP:$S377_name
+	*** 000085	8b e5 			mov	sp,bp
+	*** 000087	5d 			pop	bp
+	*** 000088	c3 			ret	
+; Line 61
+	*** 000089	90 			nop	
+; Line 62
+					$I378:
+	*** 00008a	2b c0 			sub	ax,ax
+; Line 63
+	*** 00008c	8b e5 			mov	sp,bp
+	*** 00008e	5d 			pop	bp
+	*** 00008f	c3 			ret	
+
+_get_inp	ENDP
+; Line 69
+	PUBLIC	_get_fun
+_get_fun	PROC NEAR
+	*** 000090	55 			push	bp
+	*** 000091	8b ec 			mov	bp,sp
+	*** 000093	33 c0 			xor	ax,ax
+	*** 000095	e8 00 00 		call	__aNchkstk
+;	argv = 6
+;	argc = 4
+; Line 73
+	*** 000098	83 7e 04 03 		cmp	WORD PTR [bp+4],3	;argc
+	*** 00009c	72 2e 			jb	$I388
+; Line 74
+; Line 75
+	*** 00009e	8b 5e 06 		mov	bx,WORD PTR [bp+6]	;argv
+	*** 0000a1	ff 77 02 		push	WORD PTR [bx+2]
+	*** 0000a4	b8 40 00 		mov	ax,OFFSET DGROUP:$S386_funct
+	*** 0000a7	50 			push	ax
+	*** 0000a8	e8 00 00 		call	_strcpy
+	*** 0000ab	8b e5 			mov	sp,bp
+; Line 76
+	*** 0000ad	c6 06 41 00 00 		mov	BYTE PTR $S386_funct+1,0
+; Line 78
+	*** 0000b2	80 26 40 00 5f 		and	BYTE PTR $S386_funct,95
+	*** 0000b7	80 3e 40 00 53 		cmp	BYTE PTR $S386_funct,83
+	*** 0000bc	74 07 			je	$I389
+	*** 0000be	80 3e 40 00 52 		cmp	BYTE PTR $S386_funct,82
+	*** 0000c3	75 07 			jne	$I388
+					$I389:
+; Line 79
+	*** 0000c5	b8 40 00 		mov	ax,OFFSET DGROUP:$S386_funct
+	*** 0000c8	8b e5 			mov	sp,bp
+	*** 0000ca	5d 			pop	bp
+	*** 0000cb	c3 			ret	
+; Line 80
+					$I388:
+; Line 81
+	*** 0000cc	2b c0 			sub	ax,ax
+; Line 82
+	*** 0000ce	8b e5 			mov	sp,bp
+	*** 0000d0	5d 			pop	bp
+	*** 0000d1	c3 			ret	
+
+_get_fun	ENDP
+; Line 87
+	PUBLIC	_get_prt
+_get_prt	PROC NEAR
+	*** 0000d2	55 			push	bp
+	*** 0000d3	8b ec 			mov	bp,sp
+	*** 0000d5	33 c0 			xor	ax,ax
+	*** 0000d7	e8 00 00 		call	__aNchkstk
+;	argv = 6
+;	argc = 4
+; Line 91
+	*** 0000da	83 7e 04 03 		cmp	WORD PTR [bp+4],3	;argc
+	*** 0000de	72 24 			jb	$I395
+; Line 92
+; Line 93
+	*** 0000e0	8b 5e 06 		mov	bx,WORD PTR [bp+6]	;argv
+	*** 0000e3	ff 77 02 		push	WORD PTR [bx+2]
+	*** 0000e6	b8 44 00 		mov	ax,OFFSET DGROUP:$S393_prt
+	*** 0000e9	50 			push	ax
+	*** 0000ea	e8 00 00 		call	_strcpy
+	*** 0000ed	8b e5 			mov	sp,bp
+; Line 94
+	*** 0000ef	80 3e 45 00 30 		cmp	BYTE PTR $S393_prt+1,48
+	*** 0000f4	7e 0e 			jle	$I395
+	*** 0000f6	80 3e 45 00 35 		cmp	BYTE PTR $S393_prt+1,53
+	*** 0000fb	7d 07 			jge	$I395
+; Line 95
+	*** 0000fd	b8 45 00 		mov	ax,OFFSET DGROUP:$S393_prt+1
+	*** 000100	8b e5 			mov	sp,bp
+	*** 000102	5d 			pop	bp
+	*** 000103	c3 			ret	
+; Line 96
+					$I395:
+; Line 97
+	*** 000104	2b c0 			sub	ax,ax
+; Line 98
+	*** 000106	8b e5 			mov	sp,bp
+	*** 000108	5d 			pop	bp
+	*** 000109	c3 			ret	
+
+_get_prt	ENDP
+_TEXT	ENDS
+END

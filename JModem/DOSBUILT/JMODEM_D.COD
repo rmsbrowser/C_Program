@@ -1,0 +1,383 @@
+;	Static Name Aliases
+;
+	TITLE   JMODEM_d.C
+	.8087
+INCLUDELIB	SLIBCE
+_TEXT	SEGMENT  WORD PUBLIC 'CODE'
+_TEXT	ENDS
+_DATA	SEGMENT  WORD PUBLIC 'DATA'
+_DATA	ENDS
+CONST	SEGMENT  WORD PUBLIC 'CONST'
+CONST	ENDS
+_BSS	SEGMENT  WORD PUBLIC 'BSS'
+_BSS	ENDS
+DGROUP	GROUP	CONST, _BSS, _DATA
+	ASSUME DS: DGROUP, SS: DGROUP
+EXTRN	_printf:NEAR
+EXTRN	__aNchkstk:NEAR
+_DATA      SEGMENT
+$SG253	DB	0aH, 'Usage:',  00H
+$SG257	DB	0aH, 'JMODEM S%d FILENAME.TYP < Send a file using COM%d  >',  00H
+$SG261	DB	0aH, 'JMODEM R%d FILENAME.TYP <Receive a file using COM%d>',  00H
+_DATA      ENDS
+_TEXT      SEGMENT
+	ASSUME	CS: _TEXT
+; Line 1
+; Line 14
+; Line 15
+; Line 16
+; Line 22
+	PUBLIC	_disp
+_disp	PROC NEAR
+	*** 000000	55 			push	bp
+	*** 000001	8b ec 			mov	bp,sp
+	*** 000003	b8 02 00 		mov	ax,2
+	*** 000006	e8 00 00 		call	__aNchkstk
+;	i = -2
+; Line 24
+	*** 000009	b8 00 00 		mov	ax,OFFSET DGROUP:$SG253
+	*** 00000c	50 			push	ax
+	*** 00000d	e8 00 00 		call	_printf
+	*** 000010	83 c4 02 		add	sp,2
+; Line 25
+	*** 000013	c7 46 fe 01 00 		mov	WORD PTR [bp-2],1	;i
+					$FC255:
+; Line 26
+	*** 000018	ff 76 fe 		push	WORD PTR [bp-2]	;i
+	*** 00001b	ff 76 fe 		push	WORD PTR [bp-2]	;i
+	*** 00001e	b8 08 00 		mov	ax,OFFSET DGROUP:$SG257
+	*** 000021	50 			push	ax
+	*** 000022	e8 00 00 		call	_printf
+	*** 000025	83 c4 06 		add	sp,6
+	*** 000028	ff 46 fe 		inc	WORD PTR [bp-2]	;i
+	*** 00002b	83 7e fe 05 		cmp	WORD PTR [bp-2],5	;i
+	*** 00002f	72 e7 			jb	$FC255
+; Line 27
+	*** 000031	c7 46 fe 01 00 		mov	WORD PTR [bp-2],1	;i
+					$FC259:
+; Line 28
+	*** 000036	ff 76 fe 		push	WORD PTR [bp-2]	;i
+	*** 000039	ff 76 fe 		push	WORD PTR [bp-2]	;i
+	*** 00003c	b8 3e 00 		mov	ax,OFFSET DGROUP:$SG261
+	*** 00003f	50 			push	ax
+	*** 000040	e8 00 00 		call	_printf
+	*** 000043	83 c4 06 		add	sp,6
+	*** 000046	ff 46 fe 		inc	WORD PTR [bp-2]	;i
+	*** 000049	83 7e fe 05 		cmp	WORD PTR [bp-2],5	;i
+	*** 00004d	72 e7 			jb	$FC259
+; Line 30
+	*** 00004f	8b e5 			mov	sp,bp
+	*** 000051	5d 			pop	bp
+	*** 000052	c3 			ret	
+	*** 000053	90 			nop	
+
+_disp	ENDP
+; Line 40
+	PUBLIC	_encode
+_encode	PROC NEAR
+	*** 000054	55 			push	bp
+	*** 000055	8b ec 			mov	bp,sp
+	*** 000057	b8 08 00 		mov	ax,8
+	*** 00005a	e8 00 00 		call	__aNchkstk
+;	how_many = -2
+;	count = -6
+;	dupl = -4
+;	out_buffer = 8
+;	in_buffer = 6
+;	len = 4
+; Line 45
+	*** 00005d	2b c0 			sub	ax,ax
+	*** 00005f	89 46 fe 		mov	WORD PTR [bp-2],ax	;how_many
+	*** 000062	89 46 fa 		mov	WORD PTR [bp-6],ax	;count
+; Line 48
+	*** 000065	e9 8e 00 		jmp	$L20004
+					$FC270:
+; Line 49
+; Line 51
+	*** 000068	8b 5e 06 		mov	bx,WORD PTR [bp+6]	;in_buffer
+	*** 00006b	80 3f bb 		cmp	BYTE PTR [bx],187
+	*** 00006e	74 07 			je	$I273
+	*** 000070	8a 07 			mov	al,BYTE PTR [bx]
+	*** 000072	38 47 01 		cmp	BYTE PTR [bx+1],al
+	*** 000075	75 5d 			jne	$I272
+					$I273:
+; Line 52
+; Line 53
+	*** 000077	8b 5e 08 		mov	bx,WORD PTR [bp+8]	;out_buffer
+	*** 00007a	ff 46 08 		inc	WORD PTR [bp+8]	;out_buffer
+	*** 00007d	c6 07 bb 		mov	BYTE PTR [bx],187
+; Line 54
+	*** 000080	8b 5e 06 		mov	bx,WORD PTR [bp+6]	;in_buffer
+	*** 000083	8a 07 			mov	al,BYTE PTR [bx]
+	*** 000085	88 46 fc 		mov	BYTE PTR [bp-4],al	;dupl
+; Line 55
+	*** 000088	c7 46 fe 00 00 		mov	WORD PTR [bp-2],0	;how_many
+; Line 57
+	*** 00008d	eb 0d 			jmp	SHORT $L20003
+	*** 00008f	90 			nop	
+					$FC275:
+	*** 000090	83 7e 04 00 		cmp	WORD PTR [bp+4],0	;len
+	*** 000094	74 13 			je	$FB276
+; Line 58
+; Line 59
+	*** 000096	ff 46 fe 		inc	WORD PTR [bp-2]	;how_many
+; Line 60
+	*** 000099	ff 4e 04 		dec	WORD PTR [bp+4]	;len
+; Line 61
+					$L20003:
+	*** 00009c	8a 46 fc 		mov	al,BYTE PTR [bp-4]	;dupl
+	*** 00009f	8b 5e 06 		mov	bx,WORD PTR [bp+6]	;in_buffer
+	*** 0000a2	ff 46 06 		inc	WORD PTR [bp+6]	;in_buffer
+	*** 0000a5	38 07 			cmp	BYTE PTR [bx],al
+	*** 0000a7	74 e7 			je	$FC275
+					$FB276:
+; Line 64
+	*** 0000a9	8a 46 fe 		mov	al,BYTE PTR [bp-2]	;how_many
+	*** 0000ac	8b 5e 08 		mov	bx,WORD PTR [bp+8]	;out_buffer
+	*** 0000af	ff 46 08 		inc	WORD PTR [bp+8]	;out_buffer
+	*** 0000b2	88 07 			mov	BYTE PTR [bx],al
+; Line 66
+	*** 0000b4	8a 46 ff 		mov	al,BYTE PTR [bp-1]
+	*** 0000b7	8b 5e 08 		mov	bx,WORD PTR [bp+8]	;out_buffer
+	*** 0000ba	ff 46 08 		inc	WORD PTR [bp+8]	;out_buffer
+	*** 0000bd	88 07 			mov	BYTE PTR [bx],al
+; Line 67
+	*** 0000bf	8a 46 fc 		mov	al,BYTE PTR [bp-4]	;dupl
+	*** 0000c2	8b 5e 08 		mov	bx,WORD PTR [bp+8]	;out_buffer
+	*** 0000c5	ff 46 08 		inc	WORD PTR [bp+8]	;out_buffer
+	*** 0000c8	88 07 			mov	BYTE PTR [bx],al
+; Line 68
+	*** 0000ca	83 46 fa 04 		add	WORD PTR [bp-6],4	;count
+; Line 69
+	*** 0000ce	ff 4e 06 		dec	WORD PTR [bp+6]	;in_buffer
+; Line 70
+; Line 71
+	*** 0000d1	eb 14 			jmp	SHORT $I277
+	*** 0000d3	90 			nop	
+					$I272:
+; Line 72
+; Line 73
+	*** 0000d4	ff 46 06 		inc	WORD PTR [bp+6]	;in_buffer
+	*** 0000d7	8a 07 			mov	al,BYTE PTR [bx]
+	*** 0000d9	8b 5e 08 		mov	bx,WORD PTR [bp+8]	;out_buffer
+	*** 0000dc	ff 46 08 		inc	WORD PTR [bp+8]	;out_buffer
+	*** 0000df	88 07 			mov	BYTE PTR [bx],al
+; Line 74
+	*** 0000e1	ff 46 fa 		inc	WORD PTR [bp-6]	;count
+; Line 75
+	*** 0000e4	ff 4e 04 		dec	WORD PTR [bp+4]	;len
+; Line 76
+					$I277:
+; Line 77
+	*** 0000e7	81 7e fa 00 20 		cmp	WORD PTR [bp-6],8192	;count
+	*** 0000ec	76 08 			jbe	$L20004
+; Line 78
+	*** 0000ee	b8 ff ff 		mov	ax,-1
+	*** 0000f1	8b e5 			mov	sp,bp
+	*** 0000f3	5d 			pop	bp
+	*** 0000f4	c3 			ret	
+; Line 79
+	*** 0000f5	90 			nop	
+					$L20004:
+	*** 0000f6	83 7e 04 00 		cmp	WORD PTR [bp+4],0	;len
+	*** 0000fa	74 03 			je	$JCC250
+	*** 0000fc	e9 69 ff 		jmp	$FC270
+					$JCC250:
+; Line 80
+	*** 0000ff	8b 46 fa 		mov	ax,WORD PTR [bp-6]	;count
+; Line 81
+	*** 000102	8b e5 			mov	sp,bp
+	*** 000104	5d 			pop	bp
+	*** 000105	c3 			ret	
+
+_encode	ENDP
+; Line 90
+	PUBLIC	_decode
+_decode	PROC NEAR
+	*** 000106	55 			push	bp
+	*** 000107	8b ec 			mov	bp,sp
+	*** 000109	b8 08 00 		mov	ax,8
+	*** 00010c	e8 00 00 		call	__aNchkstk
+;	i = -4
+;	j = -6
+;	c = -2
+;	limit = -8
+;	out_buffer = 8
+;	in_buffer = 6
+;	len = 4
+; Line 95
+	*** 00010f	2b c0 			sub	ax,ax
+	*** 000111	89 46 fc 		mov	WORD PTR [bp-4],ax	;i
+	*** 000114	89 46 fa 		mov	WORD PTR [bp-6],ax	;j
+; Line 99
+	*** 000117	8b 46 06 		mov	ax,WORD PTR [bp+6]	;in_buffer
+	*** 00011a	03 46 04 		add	ax,WORD PTR [bp+4]	;len
+	*** 00011d	89 46 f8 		mov	WORD PTR [bp-8],ax	;limit
+; Line 100
+	*** 000120	eb 5d 			jmp	SHORT $L20005
+					$FC288:
+; Line 101
+; Line 102
+	*** 000122	8b d8 			mov	bx,ax
+	*** 000124	80 3f bb 		cmp	BYTE PTR [bx],187
+	*** 000127	75 43 			jne	$I290
+; Line 103
+; Line 105
+	*** 000129	ff 46 06 		inc	WORD PTR [bp+6]	;in_buffer
+	*** 00012c	8b 5e 06 		mov	bx,WORD PTR [bp+6]	;in_buffer
+	*** 00012f	8a 07 			mov	al,BYTE PTR [bx]
+	*** 000131	2a e4 			sub	ah,ah
+	*** 000133	89 46 fc 		mov	WORD PTR [bp-4],ax	;i
+; Line 107
+	*** 000136	43 			inc	bx
+	*** 000137	89 5e 06 		mov	WORD PTR [bp+6],bx	;in_buffer
+	*** 00013a	8a 27 			mov	ah,BYTE PTR [bx]
+	*** 00013c	2a c0 			sub	al,al
+	*** 00013e	09 46 fc 		or	WORD PTR [bp-4],ax	;i
+; Line 108
+	*** 000141	43 			inc	bx
+	*** 000142	89 5e 06 		mov	WORD PTR [bp+6],bx	;in_buffer
+	*** 000145	8a 07 			mov	al,BYTE PTR [bx]
+	*** 000147	88 46 fe 		mov	BYTE PTR [bp-2],al	;c
+	*** 00014a	8d 47 01 		lea	ax,WORD PTR [bx+1]
+	*** 00014d	89 46 06 		mov	WORD PTR [bp+6],ax	;in_buffer
+; Line 109
+	*** 000150	eb 03 			jmp	SHORT $F291
+					$FC292:
+	*** 000152	ff 4e fc 		dec	WORD PTR [bp-4]	;i
+					$F291:
+	*** 000155	83 7e fc 00 		cmp	WORD PTR [bp-4],0	;i
+	*** 000159	74 24 			je	$L20005
+; Line 110
+; Line 111
+	*** 00015b	8a 46 fe 		mov	al,BYTE PTR [bp-2]	;c
+	*** 00015e	8b 5e 08 		mov	bx,WORD PTR [bp+8]	;out_buffer
+	*** 000161	ff 46 08 		inc	WORD PTR [bp+8]	;out_buffer
+	*** 000164	88 07 			mov	BYTE PTR [bx],al
+; Line 112
+	*** 000166	ff 46 fa 		inc	WORD PTR [bp-6]	;j
+; Line 113
+	*** 000169	eb e7 			jmp	SHORT $FC292
+	*** 00016b	90 			nop	
+					$I290:
+; Line 116
+; Line 117
+	*** 00016c	8b 5e 06 		mov	bx,WORD PTR [bp+6]	;in_buffer
+	*** 00016f	ff 46 06 		inc	WORD PTR [bp+6]	;in_buffer
+	*** 000172	8a 07 			mov	al,BYTE PTR [bx]
+	*** 000174	8b 5e 08 		mov	bx,WORD PTR [bp+8]	;out_buffer
+	*** 000177	ff 46 08 		inc	WORD PTR [bp+8]	;out_buffer
+	*** 00017a	88 07 			mov	BYTE PTR [bx],al
+; Line 118
+	*** 00017c	ff 46 fa 		inc	WORD PTR [bp-6]	;j
+; Line 119
+; Line 120
+					$L20005:
+	*** 00017f	8b 46 06 		mov	ax,WORD PTR [bp+6]	;in_buffer
+	*** 000182	39 46 f8 		cmp	WORD PTR [bp-8],ax	;limit
+	*** 000185	77 9b 			ja	$FC288
+; Line 121
+	*** 000187	8b 46 fa 		mov	ax,WORD PTR [bp-6]	;j
+; Line 122
+	*** 00018a	8b e5 			mov	sp,bp
+	*** 00018c	5d 			pop	bp
+	*** 00018d	c3 			ret	
+
+_decode	ENDP
+; Line 131
+	PUBLIC	_calc_crc
+_calc_crc	PROC NEAR
+	*** 00018e	55 			push	bp
+	*** 00018f	8b ec 			mov	bp,sp
+	*** 000191	b8 04 00 		mov	ax,4
+	*** 000194	e8 00 00 		call	__aNchkstk
+;	crc = -2
+;	i = -4
+;	buffer = 8
+;	length = 6
+;	command = 4
+; Line 135
+	*** 000197	c7 46 fe 00 00 		mov	WORD PTR [bp-2],0	;crc
+; Line 138
+	*** 00019c	83 6e 06 02 		sub	WORD PTR [bp+6],2	;length
+; Line 139
+					$D301:
+; Line 140
+; Line 142
+	*** 0001a0	8a 46 06 		mov	al,BYTE PTR [bp+6]	;length
+	*** 0001a3	25 07 00 		and	ax,7
+	*** 0001a6	89 46 fc 		mov	WORD PTR [bp-4],ax	;i
+; Line 143
+	*** 0001a9	8b c8 			mov	cx,ax
+	*** 0001ab	8b 5e 08 		mov	bx,WORD PTR [bp+8]	;buffer
+	*** 0001ae	ff 46 08 		inc	WORD PTR [bp+8]	;buffer
+	*** 0001b1	8a 07 			mov	al,BYTE PTR [bx]
+	*** 0001b3	2a e4 			sub	ah,ah
+	*** 0001b5	01 46 fe 		add	WORD PTR [bp-2],ax	;crc
+	*** 0001b8	8b 46 fe 		mov	ax,WORD PTR [bp-2]	;crc
+	*** 0001bb	d3 c0 			rol	ax,cl
+	*** 0001bd	89 46 fe 		mov	WORD PTR [bp-2],ax	;crc
+; Line 144
+	*** 0001c0	ff 4e 06 		dec	WORD PTR [bp+6]	;length
+	*** 0001c3	75 db 			jne	$D301
+; Line 146
+	*** 0001c5	8b 46 04 		mov	ax,WORD PTR [bp+4]	;command
+	*** 0001c8	0b c0 			or	ax,ax
+	*** 0001ca	74 06 			je	$SC308
+	*** 0001cc	48 			dec	ax
+	*** 0001cd	74 25 			je	$SC309
+	*** 0001cf	eb 3d 			jmp	SHORT $SD310
+; Line 147
+	*** 0001d1	90 			nop	
+; Line 148
+					$SC308:
+; Line 149
+; Line 150
+	*** 0001d2	8b 5e 08 		mov	bx,WORD PTR [bp+8]	;buffer
+	*** 0001d5	ff 46 08 		inc	WORD PTR [bp+8]	;buffer
+	*** 0001d8	8a 07 			mov	al,BYTE PTR [bx]
+	*** 0001da	2a e4 			sub	ah,ah
+	*** 0001dc	89 46 fc 		mov	WORD PTR [bp-4],ax	;i
+; Line 152
+	*** 0001df	8b 46 fe 		mov	ax,WORD PTR [bp-2]	;crc
+	*** 0001e2	8b 5e 08 		mov	bx,WORD PTR [bp+8]	;buffer
+	*** 0001e5	8a 2f 			mov	ch,BYTE PTR [bx]
+	*** 0001e7	2a c9 			sub	cl,cl
+	*** 0001e9	09 4e fc 		or	WORD PTR [bp-4],cx	;i
+	*** 0001ec	2b 46 fc 		sub	ax,WORD PTR [bp-4]	;i
+	*** 0001ef	8b e5 			mov	sp,bp
+	*** 0001f1	5d 			pop	bp
+	*** 0001f2	c3 			ret	
+; Line 153
+	*** 0001f3	90 			nop	
+; Line 154
+					$SC309:
+; Line 155
+; Line 156
+	*** 0001f4	8a 46 fe 		mov	al,BYTE PTR [bp-2]	;crc
+	*** 0001f7	8b 5e 08 		mov	bx,WORD PTR [bp+8]	;buffer
+	*** 0001fa	ff 46 08 		inc	WORD PTR [bp+8]	;buffer
+	*** 0001fd	88 07 			mov	BYTE PTR [bx],al
+; Line 157
+	*** 0001ff	8a 46 ff 		mov	al,BYTE PTR [bp-1]
+	*** 000202	8b 5e 08 		mov	bx,WORD PTR [bp+8]	;buffer
+	*** 000205	88 07 			mov	BYTE PTR [bx],al
+; Line 158
+	*** 000207	8b 46 fe 		mov	ax,WORD PTR [bp-2]	;crc
+	*** 00020a	8b e5 			mov	sp,bp
+	*** 00020c	5d 			pop	bp
+	*** 00020d	c3 			ret	
+; Line 159
+; Line 160
+					$SD310:
+; Line 161
+	*** 00020e	b8 ff ff 		mov	ax,-1
+; Line 163
+	*** 000211	8b e5 			mov	sp,bp
+	*** 000213	5d 			pop	bp
+	*** 000214	c3 			ret	
+	*** 000215	90 			nop	
+
+_calc_crc	ENDP
+_TEXT	ENDS
+END

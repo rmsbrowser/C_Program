@@ -1,0 +1,492 @@
+
+ Start  Stop   Length Name                   Class
+ 00000H 03419H 0341AH _TEXT                  CODE
+ 03420H 03421H 00002H EMULATOR_TEXT          CODE
+ 03422H 03422H 00000H C_ETEXT                ENDCODE
+ 03430H 03430H 00000H EMULATOR_DATA          FAR_DATA
+ 03430H 03471H 00042H NULL                   BEGDATA
+ 03472H 03AB7H 00646H _DATA                  DATA
+ 03AB8H 03AB9H 00002H XIQC                   DATA
+ 03ABAH 03AC7H 0000EH DBDATA                 DATA
+ 03AC8H 03AD5H 0000EH CDATA                  DATA
+ 03AD6H 03AD6H 00000H XIFB                   DATA
+ 03AD6H 03AD6H 00000H XIF                    DATA
+ 03AD6H 03AD6H 00000H XIFE                   DATA
+ 03AD6H 03AD6H 00000H XIB                    DATA
+ 03AD6H 03AD6H 00000H XI                     DATA
+ 03AD6H 03AD6H 00000H XIE                    DATA
+ 03AD6H 03AD6H 00000H XPB                    DATA
+ 03AD6H 03AD7H 00002H XP                     DATA
+ 03AD8H 03AD8H 00000H XPE                    DATA
+ 03AD8H 03AD8H 00000H XCB                    DATA
+ 03AD8H 03AD8H 00000H XC                     DATA
+ 03AD8H 03AD8H 00000H XCE                    DATA
+ 03AD8H 03AD8H 00000H XCFB                   DATA
+ 03AD8H 03AD8H 00000H XCF                    DATA
+ 03AD8H 03AD8H 00000H XCFE                   DATA
+ 03AD8H 03AD8H 00000H CONST                  CONST
+ 03AD8H 03ADFH 00008H HDR                    MSG
+ 03AE0H 03BB5H 000D6H MSG                    MSG
+ 03BB6H 03BB7H 00002H PAD                    MSG
+ 03BB8H 03BB8H 00001H EPAD                   MSG
+ 03BBAH 03C0BH 00052H _BSS                   BSS
+ 03C0CH 03C0CH 00000H XOB                    BSS
+ 03C0CH 03C0CH 00000H XO                     BSS
+ 03C0CH 03C0CH 00000H XOE                    BSS
+ 03C10H 03F05H 002F6H c_common               BSS
+ 03F10H 0470FH 00800H STACK                  STACK
+
+ Origin   Group
+ 0343:0   DGROUP
+
+  Address         Publics by Name
+
+ 0343:02D2       STKHQQ
+ 0343:0044       _abrt
+ 0000:0816       _allocate_memory
+ 0000:332E       _atol
+ 0343:026A       _attribute
+ 0343:0252       _box_loc
+ 0343:07F6       _buff
+ 0343:0A78       _buffer
+ 0000:0C72       _calc_crc
+ 0000:1A22       _close
+ 0000:0E06       _close_chan
+ 0343:0AC0       _comp_buffer
+ 0000:0F56       _com_int
+ 0343:0544       _daylight
+ 0000:0BEA       _decode
+ 0000:0AE4       _disp
+ 0343:0062       _done
+ 0343:078A       _edata
+ 0000:0B38       _encode
+ 0343:0AE0       _end
+ 0000:16F0       _end_box
+ 0343:0AC2       _end_col
+ 0343:07EC       _end_row
+ 0343:0317       _environ
+ 0343:02F0       _errno
+ 0000:21F6       _exit
+ 0000:0FD0       _fatal_abort
+ 0000:2E7A       _fflush
+ 0343:0A86       _file_buffer
+ 0000:0920       _file_io
+ 0343:028C       _fil_blk
+ 0343:07EE       _finish
+ 0000:0EDE       _flush
+ 0000:2EEC       _flushall
+ 0000:1E2A       _free
+ 0000:252A       _fwrite
+ 0000:3332       _getenv
+ 0000:1872       _get_char_atr
+ 0000:17EA       _get_curs
+ 0000:08A6       _get_fun
+ 0000:0852       _get_inp
+ 0000:083E       _get_port
+ 0000:08E8       _get_prt
+ 0343:0A8E       _handle
+ 0343:0A8A       _hardware_port
+ 0000:1E60       _int86
+ 0343:07E8       _int_buffer
+ 0343:07F4       _in_buffer
+ 0000:1806       _kill_curs
+ 0343:0A00       _last_box
+ 0000:2F3E       _lseek
+ 0000:0016       _main
+ 0000:1E26       _malloc
+ 0000:32A8       _memcpy
+ 0343:09FE       _next_line
+ 0343:004E       _okay
+ 0343:07E0       _old_brk
+ 0343:0AD2       _old_com
+ 0343:0A92       _old_ier
+ 0343:0A76       _old_mask
+ 0343:0A90       _old_mcr
+ 0343:07F2       _old_stat
+ 0343:07E4       _old_tim
+ 0000:1A5C       _open
+ 0000:0CFA       _open_chan
+ 0343:07F8       _out_buffer
+ 0343:0A94       _o_file
+ 0343:0A84       _port
+ 0343:0102       _port_pars
+ 0000:19E6       _printf
+ 0000:1EDE       _puts
+ 0000:1BFE       _read
+ 0000:0E5A       _read_chan
+ 0343:0AD0       _read_ptr
+ 0000:06A6       _recv_blk
+ 0000:2038       _remove
+ 0000:2024       _rename
+ 0000:1826       _restore_curs
+ 0343:0058       _retry
+ 0000:075E       _rx_sync
+ 0343:0A06       _sav_par
+ 0000:0FF4       _screen
+ 0000:05B4       _send_blk
+ 0000:154E       _set_box
+ 0000:1846       _set_char_atr
+ 0000:17C2       _set_curs
+ 0343:0276       _signon
+ 0000:1A42       _sopen
+ 0000:1F52       _sprintf
+ 0000:2CA2       _stackavail
+ 0343:0A02       _start
+ 0343:09FC       _start_col
+ 0343:0A88       _start_row
+ 0343:0A8C       _start_txt
+ 0343:027C       _sta_blk
+ 0000:1FFA       _strchr
+ 0000:1E2E       _strcpy
+ 0000:2CFE       _strlen
+ 0000:338C       _strncmp
+ 0000:3306       _strncpy
+ 0343:0AC4       _syst
+ 0000:1FA8       _time
+ 0343:07EA       _timer
+ 0343:0540       _timezone
+ 0000:0F94       _tim_int
+ 0000:07F0       _tx_sync
+ 0343:0546       _tzname
+ 0000:3142       _tzset
+ 0000:2038       _unlink
+ 0343:0042       _user_abort
+ 0000:1CE8       _write
+ 0000:0EEA       _write_chan
+ 0343:09FA       _write_ptr
+ 0000:1892       _write_str
+ 0343:02D0       __aaltstkovr
+ 0343:02D4       __acfinfo
+ 0000:9876  Abs  __acrtmsg
+ 0000:9876  Abs  __acrtused
+ 0000:D6D6  Abs  __aDBdoswp
+ 0343:0326       __adbgmsg
+ 0343:02B4       __aexit_rtn
+ 0343:02E2       __aintdiv
+ 0343:04EC       __amblksiz
+ 0000:19AC       __amsg_exit
+ 0000:19CE       __aNchkstk
+ 0000:32D4       __aNlmul
+ 0000:20C8       __aNuldiv
+ 0343:0042       __anullsize
+ 0000:32D4       __aNulmul
+ 0343:02CC       __aseghi
+ 0343:02CE       __aseglo
+ 0343:02B6       __asizds
+ 0343:04FE       __asizeC
+ 0343:04FF       __asizeD
+ 0000:18E4       __astart
+ 0343:02B2       __atopsp
+ 0343:07FA       __bufin
+ 0000:33C6       __catox
+ 0000:2205       __cexit
+ 0343:04EE       __cfltcvt_tab
+ 0343:04EA       __cflush
+ 0000:2046       __chain_intr
+ 0343:031E       __child
+ 0000:19CE       __chkstk
+ 0000:2128       __cinit
+ 0000:199C       __cintDIV
+ 0000:2277       __ctermsub
+ 0343:0586       __ctype
+ 0343:0586       __ctype_
+ 0000:1BED       __cXENIXtoDOSmode
+ 0000:220F       __c_exit
+ 0000:19CB       __dataseg
+ 0343:051A       __days
+ 0343:02FB       __doserrno
+ 0000:24D4       __dosret0
+ 0000:24E9       __dosretax
+ 0000:24DC       __dosreturn
+ 0343:02F8       __dosvermajor
+ 0343:02F9       __dosverminor
+ 0000:207F       __dos_findfirst
+ 0000:2074       __dos_findnext
+ 0000:2062       __dos_getvect
+ 0000:20B2       __dos_setvect
+ 0000:2D1A       __dtoxtime
+ 0342:0000       __EmDataSeg
+ 0000:21FD       __exit
+ 0343:02E6       __fac
+ 0000:22C6       __FF_MSGBANNER
+ 0000:3111       __findlast
+ 0000:262C       __flsbuf
+ 0343:04E8       __fmode
+ 0343:069A       __fpinit
+ 0000:2E10       __fptrap
+ 0000:277D       __ftbuf
+ 0000:2E38       __getbuf
+ 0000:3034       __growseg
+ 0000:30C0       __incseg
+ 0343:0321       __intno
+ 0343:033E       __iob
+ 0343:03DE       __iob2
+ 0343:04E8       __iomode
+ 0000:31DE       __isindst
+ 0343:047E       __lastiob
+ 0343:0500       __lpdays
+ 0000:24F6       __maperror
+ 0343:02FD       __nfile
+ 0000:2CB4       __nfree
+ 0343:02B8       __nheap_desc
+ 0000:2CD5       __nmalloc
+ 0000:2474       __NMSG_TEXT
+ 0000:249F       __NMSG_WRITE
+ 0000:2E16       __nullcheck
+ 0343:02FB       __oserr
+ 0343:02FF       __osfile
+ 0343:02F8       __osmajor
+ 0343:02F9       __osminor
+ 0343:02FA       __osmode
+ 0343:02F8       __osversion
+ 0000:27CC       __output
+ 0343:0320       __ovlflag
+ 0343:0322       __ovlvec
+ 0343:0319       __pgmptr
+ 0343:02F6       __psp
+ 0343:02F4       __pspadr
+ 0000:2FB8       __searchseg
+ 0000:22E6       __setargv
+ 0000:0010       __setenvp
+ 0343:04FC       __sigintoff
+ 0343:04FA       __sigintseg
+ 0000:270C       __stbuf
+ 0343:02F2       __umaskval
+ 0343:0690       ___aDBexit
+ 0343:0696       ___aDBptrchk
+ 0343:068E       ___aDBrterr
+ 0343:068C       ___aDBswpchk
+ 0343:068A       ___aDBswpflg
+ 0343:0313       ___argc
+ 0343:0315       ___argv
+ 0343:054A       ___dnames
+ 0343:0560       ___mnames
+ 0343:0688       ___qczrinit
+ 0000:3132       ___tzset
+
+  Address         Publics by Value
+
+ 0000:0010       __setenvp
+ 0000:0016       _main
+ 0000:05B4       _send_blk
+ 0000:06A6       _recv_blk
+ 0000:075E       _rx_sync
+ 0000:07F0       _tx_sync
+ 0000:0816       _allocate_memory
+ 0000:083E       _get_port
+ 0000:0852       _get_inp
+ 0000:08A6       _get_fun
+ 0000:08E8       _get_prt
+ 0000:0920       _file_io
+ 0000:0AE4       _disp
+ 0000:0B38       _encode
+ 0000:0BEA       _decode
+ 0000:0C72       _calc_crc
+ 0000:0CFA       _open_chan
+ 0000:0E06       _close_chan
+ 0000:0E5A       _read_chan
+ 0000:0EDE       _flush
+ 0000:0EEA       _write_chan
+ 0000:0F56       _com_int
+ 0000:0F94       _tim_int
+ 0000:0FD0       _fatal_abort
+ 0000:0FF4       _screen
+ 0000:154E       _set_box
+ 0000:16F0       _end_box
+ 0000:17C2       _set_curs
+ 0000:17EA       _get_curs
+ 0000:1806       _kill_curs
+ 0000:1826       _restore_curs
+ 0000:1846       _set_char_atr
+ 0000:1872       _get_char_atr
+ 0000:1892       _write_str
+ 0000:18E4       __astart
+ 0000:199C       __cintDIV
+ 0000:19AC       __amsg_exit
+ 0000:19CB       __dataseg
+ 0000:19CE       __chkstk
+ 0000:19CE       __aNchkstk
+ 0000:19E6       _printf
+ 0000:1A22       _close
+ 0000:1A42       _sopen
+ 0000:1A5C       _open
+ 0000:1BED       __cXENIXtoDOSmode
+ 0000:1BFE       _read
+ 0000:1CE8       _write
+ 0000:1E26       _malloc
+ 0000:1E2A       _free
+ 0000:1E2E       _strcpy
+ 0000:1E60       _int86
+ 0000:1EDE       _puts
+ 0000:1F52       _sprintf
+ 0000:1FA8       _time
+ 0000:1FFA       _strchr
+ 0000:2024       _rename
+ 0000:2038       _remove
+ 0000:2038       _unlink
+ 0000:2046       __chain_intr
+ 0000:2062       __dos_getvect
+ 0000:2074       __dos_findnext
+ 0000:207F       __dos_findfirst
+ 0000:20B2       __dos_setvect
+ 0000:20C8       __aNuldiv
+ 0000:2128       __cinit
+ 0000:21F6       _exit
+ 0000:21FD       __exit
+ 0000:2205       __cexit
+ 0000:220F       __c_exit
+ 0000:2277       __ctermsub
+ 0000:22C6       __FF_MSGBANNER
+ 0000:22E6       __setargv
+ 0000:2474       __NMSG_TEXT
+ 0000:249F       __NMSG_WRITE
+ 0000:24D4       __dosret0
+ 0000:24DC       __dosreturn
+ 0000:24E9       __dosretax
+ 0000:24F6       __maperror
+ 0000:252A       _fwrite
+ 0000:262C       __flsbuf
+ 0000:270C       __stbuf
+ 0000:277D       __ftbuf
+ 0000:27CC       __output
+ 0000:2CA2       _stackavail
+ 0000:2CB4       __nfree
+ 0000:2CD5       __nmalloc
+ 0000:2CFE       _strlen
+ 0000:2D1A       __dtoxtime
+ 0000:2E10       __fptrap
+ 0000:2E16       __nullcheck
+ 0000:2E38       __getbuf
+ 0000:2E7A       _fflush
+ 0000:2EEC       _flushall
+ 0000:2F3E       _lseek
+ 0000:2FB8       __searchseg
+ 0000:3034       __growseg
+ 0000:30C0       __incseg
+ 0000:3111       __findlast
+ 0000:3132       ___tzset
+ 0000:3142       _tzset
+ 0000:31DE       __isindst
+ 0000:32A8       _memcpy
+ 0000:32D4       __aNulmul
+ 0000:32D4       __aNlmul
+ 0000:3306       _strncpy
+ 0000:332E       _atol
+ 0000:3332       _getenv
+ 0000:338C       _strncmp
+ 0000:33C6       __catox
+ 0342:0000       __EmDataSeg
+ 0343:0042       __anullsize
+ 0343:0042       _user_abort
+ 0343:0044       _abrt
+ 0343:004E       _okay
+ 0343:0058       _retry
+ 0343:0062       _done
+ 0343:0102       _port_pars
+ 0343:0252       _box_loc
+ 0343:026A       _attribute
+ 0343:0276       _signon
+ 0343:027C       _sta_blk
+ 0343:028C       _fil_blk
+ 0343:02B2       __atopsp
+ 0343:02B4       __aexit_rtn
+ 0343:02B6       __asizds
+ 0343:02B8       __nheap_desc
+ 0343:02CC       __aseghi
+ 0343:02CE       __aseglo
+ 0343:02D0       __aaltstkovr
+ 0343:02D2       STKHQQ
+ 0343:02D4       __acfinfo
+ 0343:02E2       __aintdiv
+ 0343:02E6       __fac
+ 0343:02F0       _errno
+ 0343:02F2       __umaskval
+ 0343:02F4       __pspadr
+ 0343:02F6       __psp
+ 0343:02F8       __osversion
+ 0343:02F8       __dosvermajor
+ 0343:02F8       __osmajor
+ 0343:02F9       __osminor
+ 0343:02F9       __dosverminor
+ 0343:02FA       __osmode
+ 0343:02FB       __oserr
+ 0343:02FB       __doserrno
+ 0343:02FD       __nfile
+ 0343:02FF       __osfile
+ 0343:0313       ___argc
+ 0343:0315       ___argv
+ 0343:0317       _environ
+ 0343:0319       __pgmptr
+ 0343:031E       __child
+ 0343:0320       __ovlflag
+ 0343:0321       __intno
+ 0343:0322       __ovlvec
+ 0343:0326       __adbgmsg
+ 0343:033E       __iob
+ 0343:03DE       __iob2
+ 0343:047E       __lastiob
+ 0343:04E8       __fmode
+ 0343:04E8       __iomode
+ 0343:04EA       __cflush
+ 0343:04EC       __amblksiz
+ 0343:04EE       __cfltcvt_tab
+ 0343:04FA       __sigintseg
+ 0343:04FC       __sigintoff
+ 0343:04FE       __asizeC
+ 0343:04FF       __asizeD
+ 0343:0500       __lpdays
+ 0343:051A       __days
+ 0343:0540       _timezone
+ 0343:0544       _daylight
+ 0343:0546       _tzname
+ 0343:054A       ___dnames
+ 0343:0560       ___mnames
+ 0343:0586       __ctype
+ 0343:0586       __ctype_
+ 0343:0688       ___qczrinit
+ 0343:068A       ___aDBswpflg
+ 0343:068C       ___aDBswpchk
+ 0343:068E       ___aDBrterr
+ 0343:0690       ___aDBexit
+ 0343:0696       ___aDBptrchk
+ 0343:069A       __fpinit
+ 0343:078A       _edata
+ 0343:07E0       _old_brk
+ 0343:07E4       _old_tim
+ 0343:07E8       _int_buffer
+ 0343:07EA       _timer
+ 0343:07EC       _end_row
+ 0343:07EE       _finish
+ 0343:07F2       _old_stat
+ 0343:07F4       _in_buffer
+ 0343:07F6       _buff
+ 0343:07F8       _out_buffer
+ 0343:07FA       __bufin
+ 0343:09FA       _write_ptr
+ 0343:09FC       _start_col
+ 0343:09FE       _next_line
+ 0343:0A00       _last_box
+ 0343:0A02       _start
+ 0343:0A06       _sav_par
+ 0343:0A76       _old_mask
+ 0343:0A78       _buffer
+ 0343:0A84       _port
+ 0343:0A86       _file_buffer
+ 0343:0A88       _start_row
+ 0343:0A8A       _hardware_port
+ 0343:0A8C       _start_txt
+ 0343:0A8E       _handle
+ 0343:0A90       _old_mcr
+ 0343:0A92       _old_ier
+ 0343:0A94       _o_file
+ 0343:0AC0       _comp_buffer
+ 0343:0AC2       _end_col
+ 0343:0AC4       _syst
+ 0343:0AD0       _read_ptr
+ 0343:0AD2       _old_com
+ 0343:0AE0       _end
+ 0000:9876  Abs  __acrtused
+ 0000:9876  Abs  __acrtmsg
+ 0000:D6D6  Abs  __aDBdoswp
+
+Program entry point at 0000:18E4
