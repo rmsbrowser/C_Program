@@ -1,0 +1,58 @@
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+bin/qodem
+qodem-x11
+
+# Debug files
+*.dSYM/
+
+# Editor backup files
+*.c~
+*.h~
+*.md~
+*.spec~
+Makefile~
+
+# Build artifacts
+aclocal.m4
+source/.deps/
+source/.dirstamp
+source/config.h
+source/stamp-h1
+autom4te.cache/
+config.status
+config.log
+configure.lineno
+Makefile
+aclocal.m4
+lib/cryptlib/tools/endian
+build/osx/dmg
+build/osx/*.dmg
+qodem
