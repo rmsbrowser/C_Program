@@ -1,0 +1,79 @@
+#!/bin/sh
+
+# $Id: xqodem,v 1.5 2012/05/19 14:46:52 lamonte Exp $
+#
+# This script runs qodem under X11.  It looks for qodem-x11 first.  If
+# that is not found, it then looks for uxterm, konsole, gnome-terminal
+# and x-terminal-emulator (in that order) and starts it up with qodem
+# inside it.
+#
+# CREDITS: this script is based on the 'xminicom' script from minicom.
+#
+# This program is licensed under the GNU General Public License Version 2. 
+# Please see the file "COPYING" in this directory for more information
+# about the GNU General Public License Version 2.
+#
+#     Copyright (C) 2012  Kevin Lamonte
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+# 02110-1301, USA
+
+# Qodem needs a Unicode font that includes the CP437 glyphs.  Terminus does
+# the job nicely.
+font_xterm="terminus-20"
+
+findcmd()
+{
+  IFS=:
+  for i in $PATH
+  do
+	if [ -x $i\/$1 ]
+	then
+		result=$i\/$1
+		IFS=
+		return 0
+	fi
+  done
+  result=
+  IFS=
+  return 1
+}
+
+if findcmd qodem-x11
+  then
+  exec $result
+  exit 1
+fi
+
+if findcmd uxterm
+  then
+  exec $result -fn $font_xterm -T qodem -bg black -fg white -n qodem -geometry 80x25 -e "if ! qodem ; then echo Press ENTER to continue...; read; fi"
+  exit 1
+fi
+
+if findcmd gnome-terminal
+  then
+  exec $result --title qodem --geometry 80x25 -e "if ! qodem ; then echo Press ENTER to continue...; read; fi"
+  exit 1
+fi
+
+if findcmd x-terminal-emulator
+  then
+  exec $result -T qodem -e "if ! qodem ; then echo Press ENTER to continue...; read; fi"
+  exit 1
+fi
+
+echo "xqodem: uxterm, gnome-terminal, or x-terminal-emulator NOT found!" 1>&2
+exit 1
