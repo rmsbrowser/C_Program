@@ -1,0 +1,207 @@
+
+
+
+                             MCOMM 5.50 UPDATE NOTES
+
+         Version 5.50 adds RTS flow control for the receive side.
+         Previous versions supported monitoring CTS to insure the device
+         being sent to was not overran but did not lower RTS if the PC
+         was being overran.  The function 'async_msrflow' has been
+         modified to support this option.  For more information, see the
+         updated documentation on 'async_msrflow' in ASYNC.DOC.  This
+         change also necessitated a change in the ASYNC structure making
+         it one byte longer.  BE SURE TO USE THE RIGHT HEADER FILE AND
+         RECOMPILE ANY CODE THAT USES COMM.H or COMM.HPP.
+
+         Added a Zmodem demo program called TXZM.  The shell code and
+         linkable libraries are not part of the shareware version of
+         MCOMM.  Complete source comes with the registered version.
+         This is primarily a demo with limited documentation and limited
+         support.  It also happens to be very fast and contains a lot of
+         extras.  It MAY NOT be distributed except as stated in its
+         documentation.
+
+
+                             MCOMM 5.41 UPDATE NOTES
+
+         Version 5.41 contains a few minor changes and bug fixes.  These
+         are:
+
+         1) The 'volatile' keyword was added to ASYNC structure members
+            that are modified by the interrupt handler.  This corrects
+            problems with optimizing compilers (such as MSC 6.0) that
+            load variables into registers.  Many of the macro
+            implemented functions test variables that are modified by
+            the interrupt handler.  If the compiler, in optimizing a
+            loop, loads a variable into a register that is modified by
+            the interrupt handler, it will never see the variable
+            change.  The 'volatile' key word instructs the compiler to
+            not assume the variable remains constant.  Thanks to Chris
+            Fanning for pointing this out to me.
+
+         2) The ANSI cursor position sequence did not recognize the
+            window relative ('v_wrel') mode of operation.  If an ANSI
+            cursor sequence was received, it was always treated relative
+            to 0,0.  It now treats the current window's top left corner
+            as 0,0 if 'v_wrel' is non-zero.  Thanks to David Speer for
+            this information.
+
+         3) When a line was exactly the width of the screen, any
+            following CR/LFs were ignored until a non CR/LF character
+            was received.  This is now fixed.
+
+         4) The definition of SHFT_TAB in KEYS.H has been wrong for the
+            last several versions.  Thanks to Cleo Yarber for pointing
+            this out to me several times.
+
+
+
+
+                             MCOMM 5.40 UPDATE NOTES
+
+         The 5.40 version of MCOMM corrects two problems:
+
+         1) Some UARTs miss transmit interrupts when they are ran in
+            full duplex mode.  Code was added to detect missed
+            interrupts and correct the situation.  This condition would
+            cause previous versions of MCOMM to quit transmitting until
+            the transmit buffer was flushed or the port closed and
+            reopened.  This bug only showed up when operating in full
+            duplex mode and only with some UARTs.  Version 5.40 has been
+            tested by running several megabytes of data through 8250,
+            16450, and 16550 UARTs in full duplex mode and never fails
+            to detect a missed interrupt and correct for it.
+
+         2) The loop that loads bytes into the transmit FIFOs (or the
+            transmit hold register if the UART isn't a 16550) updates
+            the transmit buffer output pointer in a register.  The loop
+            is in the transmit interrupt handler and in previous
+            versions of MCOMM5 the transmit interrupt handler code was
+            called by the routine that started up the transmitter.  If a
+            transmit interrupt occurred while the transmit start up code
+            was within this loop, the buffer output pointer could be
+            corrupted.  The result was scrambled output.  This only
+            happened if the transmitter was sent a character, allowed to
+            empty, and then immediately sent another character.  If only
+            one character was sent at a time slowly, as in typing, or if
+            the buffer was loaded up rapidly as in a program loop,
+            everything was OK.  If characters were sent in a program loop
+            that put a "small" delay between characters (character
+            pacing), it often failed.  This was corrected by changing
+            the transmit initiate routine so that it toggles the
+            transmit interrupt enable bit in the UART's interrupt enable
+            register to initiate transmit interrupts rather than calling
+            the interrupt handler directly.
+
+
+         ADDITIONS:
+
+         An option was added to the async_open function to force FIFO
+         mode off.  Previously you could OR the ComBase parameter with
+         0x8000 and the code skipped over the check for a 16550 UART.
+         If it was there and on, it stayed on.  If it was there and off,
+         it stayed off.  You can now OR the ComBase parameter with
+         0x4000 to force the FIFOs to be off.  If you don't OR anything
+         with the ComBase parameter the FIFOs will be enabled if a 16550
+         is present.
+
+         To deal with problems with the Western Digital 16550, the ASYNC
+         port structure is now one element longer.  The new element is
+         called 'IERVal'.  Also options were added to allow you to open
+         a port without enabling MSR interrupts, LSR interrupts, or
+         both.  See the notes on the WD16550 in ASYNC.DOC for more
+         information.
+
+
+
+
+         Conversion LIBs and a batch file were added to support Zortech
+         C / C++.  C++ header files and a C++ demo program for either
+         Turbo C++ or Zortech C++ were added.
+
+         Two new macros are now defined in COMM.H.  They are:
+
+         async_txcnt(ASYNC *port) -- returns number of bytes left
+                                     in the transmit buffer still to
+                                     be transmitted.  Use async_txempty
+                                     if you are waiting for 0 byte
+                                     condition -- it's more efficient.
+
+         async_rxfree(ASYNC *port) - returns bytes of free space left
+                                     in the receive buffer.
+
+
+         VIDEO FUNCTIONS:
+
+         One minor bug was fixed.  The rd_scrnd function returned an
+         incorrect pointer if the function was called with a request to
+         read 0 bytes.  The result string was correct but the return
+         value was wrong.  It now returns the correct pointer.
+
+         A new global variable was added to control whether a displayed
+         backspace character was destructive or non-destructive.
+         Previously it was always destructive and that still is the
+         default.  The variable is v_bksp.  Setting v_bksp to 0 will
+         cause the backspace character to be non-destructive.
+
+
+
+
+                            MCOMM 5.20 UPGRADE NOTES
+
+            Major changes in this version of MCOMM are support for the
+         16550 UART's FIFO mode of operation, changes in the header
+         files, new time-out functions, and updated documentation.
+
+
+         16550 UART SUPPORT:
+
+            The async code now supports the 16550 UART's FIFO mode of
+            operation.  Key features are:
+
+            1) The async_open function automatically detects a 16550 and
+               enables its FIFOs (can be optionally defeated).
+
+            2) Functions are provided to set the receiver FIFO trigger
+               level and to control the maximum number of bytes to load
+               into the transmit FIFO at one time.
+
+            3) The interrupt handler has been re-written to make most
+               efficient use of the FIFO registers (they process
+               multiple bytes per interrupt).
+
+            ASYNC.DOC contains full descriptions of the new functions
+            and changes made to the old functions.  It also has some
+            information on how to set the receiver FIFO trigger level
+            and the 'maximum number of bytes to transmit to the FIFOs at
+            one time' level to achieve the best results.
+
+
+         HEADER FILE CHANGES:
+
+            Due to stricter type checking of newer compilers, several
+            functions that formerly were declared as taking 'char' argu-
+            ments are now declared as taking 'int' arguments.  This
+            prevents getting an excessive number of warnings when pass-
+            ing constants to these functions.
+
+            The 'cdecl' keyword was added to the function prototypes to
+            prevent problems when compiling with Microsoft's 'fastcall'
+            option enabled.  This keyword, as well as the 'near' and
+            'far' keywords, may not be compatible with your compiler.
+            See MUSTREAD.DOC for more information.
+
+            All the video functions are now prototyped in ANSIDRV.H.
+            Before half of them were in ANSIDRV.H and the rest were in
+            EXTRA.H.
+
+
+         TIME OUT FUNCTIONS:
+
+            The time-out functions have been changed to a new version
+            that takes a pointer to a 'long' rather than a pointer to a
+            TIMEOUT structure.  The new functions are faster and work
+            with longer timeouts than the old versions.  Converting to
+            the new style consists mainly of changing all occurrences of
+            'struct TIMEOUT' in your code to 'long'.
+

@@ -1,0 +1,2459 @@
+
+
+
+
+
+            ASYNCHRONOUS FUNCTIONS FOR MICROSOFT, TURBO, OR ZORTECH C
+
+
+            The LIB(s) on the included disk are libraries of serial
+         communications functions designed specifically for use with
+         Microsoft C, Turbo C / C++, and Zortech C / C++.  The regis-
+         tered version has LIBs for all memory models.  The shareware
+         version is small model only.
+
+
+                    --- Features of the library functions ---
+
+            o Support for 16550 UART's FIFO mode of operation
+
+            o Fully interrupt driven
+
+            o Baud rates up to 115,200 baud
+
+            o User defined transmit and receive ring buffer sizes.
+
+            o Ring buffers may be in placed in FAR memory even in small
+              and medium model programs.
+
+            o User defined port addresses, IRQ use, and interrupt vector
+              numbers.
+
+            o Support for simultaneous operation of 2 ports.
+
+            o Built in support for XON/XOFF and hardware flow control
+
+            o Block transmit and receive functions
+
+            o Receive buffer look ahead function
+
+            o 100% assembler code for maximum speed
+
+            o Totally compatible with Microsoft C, Turbo C, Zortech C,
+              and other C compilers that use standard Microsoft high
+              level language calling conventions.
+
+
+
+         ---------------------------------------------------------------
+                Mike Dumdei,  6 Holly Lane,  Texarkana TX  75503
+                MCOMM5 (c) 1989, 1990, 1991  All Rights Reserved
+         ---------------------------------------------------------------
+
+
+
+
+
+
+                      REGISTRATION AND DISTRIBUTION POLICY
+
+            MCOMM5, the various versions of Smalterm, the ANSI video
+         routines, and other miscellaneous functions contained in the
+         COMM_x libraries are distributed as shareware.  If you use
+         these functions regularly please register them.
+
+            Two types of registration are available for MCOMM5.  The
+         first is $25 and includes assembled libraries for all memory
+         models.  The $25 registration does not include source code.
+         The second type of registration is $45 and includes libraries
+         and source code.  Previous versions were $25 for source code
+         and libraries.  If you send $25 and want source code based on
+         previous offers, you will receive a previous version of the
+         source.  Registered users of versions prior to version 5 may
+         upgrade their libraries for $3 or upgrade source code version
+         for $10.
+
+            Considerable time and effort has gone into developing and
+         debugging these routines.  If you are not a registered user and
+         have obtained a copy of the registered version, please take
+         time now to register the software or delete it.  The copy you
+         have is a registered version if it contains libraries for any
+         memory model other than small model or if any of the ASM source
+         code is included.
+
+            This software is provided as is without warranty as to its
+         fitness for a particular use or being free of errors.  I assume
+         no liability for any loss or damages you may incur through its
+         use.  I will, however, make every effort to correct any
+         software errors that may exist, and provide you with a working
+         version.
+
+            I will continue to assist registered and non-registered
+         users whenever possible.  If you have any problems using these
+         routines or questions, I may be contacted at:
+
+            North East Texas DataLink --  903 838-6713 (modem)
+                                          FIDO net:  1:19/128
+
+            Mike Dumdei               --  903 838-8307 (voice)
+
+
+
+
+
+
+                                 GETTING STARTED
+
+         All functions included in this library are listed on the fol-
+         lowing pages in alphabetical order.  The basic functions needed
+         to begin are: async_open, async_tx, async_rx, and async_close.
+
+         Functions are also available to support XON/XOFF and hardware
+         flow control, the 16550 UART, block transmit and receive,
+         receive buffer look ahead, and several other features.
+
+         All functions take a pointer to an ASYNC structure for one of
+         its arguments.  This structure is defined in COMM.H.  It
+         may be helpful to think of this structure as being similar to
+         the standard C library 'FILE *'.
+
+         If you have been using versions of these routines prior to
+         version 5.00, there have been some changes made that will
+          require you to make some modifications to any existing code
+         before it can be used with the new libraries.  The main
+         differences are:
+
+            > Async_open takes different parameters.  Also, instead
+              of the open function automatically allocating the ring
+              buffers for you, you provide the ring buffers.
+
+            > All functions now take a pointer to an ASYNC structure
+              as the first argument rather than 0 (COM1) or 1 (COM2).
+
+            > LITES is no longer supported.
+
+
+
+
+
+
+                            NOTES ON 16550 FIFO MODE
+
+            The 16550 UART is automatically detected and enabled when
+         async_open is called.  If, for some reason, you want to operate
+         a 16550 UART in non-FIFO mode, automatic detection and use can
+         be disabled.  See async_open for more information.
+
+
+                          --- Use of receiver FIFOs ---
+
+            The receiver trigger level may be programmed for 1, 4, 8, or
+         14 bytes by the async_FIFOrxlvl function.  When a port is first
+         opened the trigger is set to 1 byte.  There are 3 reasons why I
+         chose to default to a 1 byte receive trigger level.
+
+            1) While a higher trigger level results in less CPU
+               overhead, it also provides less overrun protection if the
+               CPU is slow to respond.  For example, with a 1 byte
+               trigger level the 16550 -- when it generates an interrupt
+               -- can hold 15 more characters in its FIFOs before the
+               CPU responds.  With a 14 byte trigger level it will only
+               have room for 2 more characters.
+
+            2) The MCOMM interrupt functions completely empty the
+               receiver FIFOs every time an interrupt occurs.  If the
+               CPU is slow to respond, the interrupt handler will
+               process 2,3,4.. characters (whatever is in the FIFOs)
+               whenever it does get control so the data still gets
+               buffered if the CPU isn't able to keep up.
+
+            3) Setting the trigger level at higher trigger levels when
+               displaying incoming data to the screen will result in a
+               jerky looking display, especially at low baud rates.
+               Again, this is because MCOMM empties the buffer
+               completely when it processes the interrupt.  With a
+               trigger level other than 1, data stacks up in the FIFOs
+               until the trigger level is reached.  When the interrupt
+               finally occurs, all the data in the FIFOs is pulled out
+               and made available to the higher level functions at
+               one time.  The result is your code sits for 4, 8, or 14
+               bytes (whatever the trigger is) and then puts those bytes
+               on the screen in a burst.  It looks rough at low baud
+               rates.  At 9600 baud and above you could probably get by
+               with a slightly higher trigger level.
+
+            For best use of the receive FIFOs, stick with 1 byte trigger
+         level when displaying data to the screen.  If your application
+         does not display the data or uses a high baud rate, you may
+         want to experiment with setting it to either 4 or 8 bytes.
+
+
+                          --- Use of transmit FIFOs ---
+
+            The MCOMM transmit interrupt handler takes a parameter (set
+         by async_FIFOtxlvl) that is the maximum number of bytes to load
+         into the transmit FIFOs at one time.  The default value for
+
+
+
+
+
+
+                            NOTES ON 16550 FIFO MODE
+
+         this parameter is 3 bytes.  The reason for not loading up the
+         FIFOs to maximum capacity (16 bytes) is flow control.  The
+         16550 UART will continue to transmit characters in its FIFOs
+         regardless of the state of CTS, DSR, or CD, or if an XOFF is
+         received.  It is totally up to the software to respond to
+         requests for flow control.  If the FIFOs are loaded with more
+         bytes than the receiver can handle when it invokes flow
+         control, the receiver gets overwritten.  There is a bit that
+         can be sent to the UART to flush the transmit FIFOs but then it
+         is impossible to tell what was flushed and what was sent.  The
+         solution is to not the load the FIFOs up so full.  If the
+         receiving device can handle more than 3 characters of overrun,
+         use a larger value.  If the application does not require flow
+         control, you can use a 16 byte level with no problems.
+
+            Another factor to consider concerning the transmit FIFO byte
+         level is that (from the NS Data Communications/LAN/UART
+         Handbook) the transmit FIFO empty indication will be delayed by
+         1 character time minus the last stop bit until there are at
+         least 2 bytes in the transmit FIFOs simultaneously for the
+         current transmit operation.  After the 2 byte requirement is
+         met the transmit interrupt occurs immediately when the transmit
+         FIFOs empty.  Using a value of 3 or above (1 byte for the
+         transmit shift register and 2 for the FIFO registers)
+         guarantees the interrupt delay is deactivated.  Once the '2
+         bytes in the FIFOs' requirement is met, the transmit byte level
+         can be reduced if necessary.
+
+
+                  --- Problems with Western Digital 16550s ---
+
+         The following problems DO NOT apply to the National Semicon-
+         ductor version of the 16550.  Neither are they unique to MCOMM.
+
+         Western Digital 16550 UARTs have two problems you should be
+         aware of if your application will be ran on system that uses
+         this chip.
+
+         The first of these only shows up under the following
+         conditions:
+
+            1) The UART is in FIFO mode.
+            2) A low baud rate is being used.
+            3) The transmitter is initially empty.
+            4) A block of data longer than 16 to 18 bytes (depth of the
+               FIFOs plus 1 or 2 for what gets out while the FIFOs are
+               being filled up) is sent to the chip.
+
+         Under these conditions the WD16550 UART will momentarily fail
+         to recognize the FIFOs are full and continue to generate
+         transmit interrupts.  It also fails to reset the 'Transmit Hold
+         Register Empty' bit making it impossible for the software to
+         detect a full FIFO condition.  The result is the software keeps
+         sending data to the chip, overrunning the FIFOs.  What you will
+
+
+
+
+
+
+                            NOTES ON 16550 FIFO MODE
+
+         see is, the first 16 to 18 bytes transmitted correctly, a
+         missing block of data, and then the remainder of the block also
+         correct.  This can be verified by trying to send blocks of data
+         through this chip (WD16550) at a low baud rate with any
+         software that enables the FIFOs.  How low of a baud rate is low
+         enough to cause the problem depends on the particular chip and
+         how fast the CPU and software can supply data to the chip.
+         With MCOMM, a 20 MHZ 386, and the TxByteCnt at the default
+         level of 3, the chip I was testing would not work in FIFO mode
+         below 9600 baud.  On the same system using different software,
+         it worked as low as 4800 baud.  On a 12 MHZ 286, MCOMM would
+         work at 4800 and above while the other software worked at 2400
+         and above.
+
+         For publicly distributed applications, I recommend you do one
+         or more of the following:
+
+            1) Provide an option in your program to allow the end user
+               to operate a 16550 with the FIFOs disabled.  When the
+               FIFOs are disabled, all baud rates work.  ORing the
+               ComBase parameter of async_open with 0x4000 will force
+               FIFO mode off.
+            2) Provide an option in your program to allow setting the
+               TxByteCnt level (async_FIFOtxlvl) to a lower value.  This
+               will help slightly.
+
+            3) Put a flag in your program the end user can set to let
+               you know you are dealing with a WD16550.
+
+            4) State your application does not support the Western
+               Digital version of the 16550 at low baud rates.
+
+
+         The second problem with the WD16550 is that if the 'Clear to
+         Send' signal is not connected it can, under some conditions,
+         cause the 'Delta Clear to Send' bit in the Modem Status
+         Register to become set and it will not reset.  I did not
+         research the problem enough to know if the 'locked bit' only
+         occurs when MSR interrupts are enabled, whether other floating
+         MSR input signals can cause the same problem, if all WD16550's
+         have the problem, or that is unique to the Western Digital chip
+         (considering the FIFO overrun problem, I assume it is unique).
+
+         With a properly functioning UART, reading the MSR register will
+         reset all the 'delta bits' and clear any interrupts.  With the
+         chip I had, I tried everything I could think of to clear the
+         interrupt and nothing worked except the ON/OFF switch.  I tried
+         clearing interrupts and reading the MSR multiple times checking
+         to see if the bit reset with interrupts off (it didn't),
+         disabling Modem Status interrupts via the Interrupt Enable
+         Register and then reading the MSR register (didn't work), FIFO
+         mode on / FIFO mode off (no difference), keyboard reboot of the
+         computer (didn't fix it), shut the computer off and turn it
+         back on (that fixed it).
+
+
+
+
+
+
+                            NOTES ON 16550 FIFO MODE
+
+         After encountering this problem and having the system lock up,
+         I added code to MCOMM's interrupt driver so that it would quit
+         trying to clear an interrupt after 1000 attempts.  It then sets
+         a new port structure member 'IERVal' to zero as an indicator
+         the port is locked up.  Normally 'IERVal' will be set to the
+         current value of the Interrupt Enable Register.  If you try to
+         open a port that is in a stuck interrupt condition, async_open
+         now returns R_UARTERR.  In addition, options were added to open
+         a port without enabling Modem Status interrupts or Line Status
+         interrupts or both.  ORing the ComBase parameter of async_open
+         with 0x2000 disables MSR interrupts.  ORing with 0x1000
+         disables LSR interrupts.  So far I have encountered no reason
+         for disabling LSR interrupts.  Disabling MSR interrupts
+         prevents the lock up problem but has the side effect of causing
+         all functions and variables that use Modem Status signals to be
+         invalid.  This includes hardware handshake and carrier detect.
+
+         I have probably over emphasized the Modem Status lock up
+         problem and my personal opinion is that it is not that serious.
+         I considered totally disregarding it since it has a simple
+         solution and that is to connect all Modem Status input signals
+         to some driving signal (wire the RS232 cable right).  Unused
+         signals can be connected to a driving signal on the computer
+         end if necessary.  Also it may be isolated to one defective
+         chip.  I tested two WD16550s and the problem only showed up on
+         one of them during my testing.  Because the computer totally
+         locked up when this happened though, I decided to go ahead and
+         program for the possibility.  At least control of the computer
+         is regained and you can tell the user he needs a properly wired
+         RS232 cable or his UART is broke and then exit gracefully.
+         This will probably show up very very rarely so don't be too
+         concerned about it.  In closing, I would like to point out
+         again that these problems are a fault of the WD16550 and are
+         not unique to MCOMM.
+
+
+
+
+
+
+         async_16550
+         ---------------------------------------------------------------
+
+         Purpose: Check if 16550 UART was detected in system.
+
+         Format:  int async_16550(port);
+                   ASYNC *port;       Pointer to ASYNC structure
+
+         Example:
+
+                  ASYNC *port;
+                  int is_16550;
+
+                  is_16550 = async_16550(port);
+
+         Returns: Returns zero if a 16550 is not in the system or the
+                  'ignore 16550 bit' was set when async_open was called.
+                  Returns NZ if a 16550 was found.  Async_open must be
+                  called before this function is valid.  If a 16550 is
+                  found, it will be placed in the FIFO mode of operation
+                  by async_open unless '16550 detect' was overridden or
+                  the force FIFOs off option was selected.
+
+         Remarks: This function is implemented as a macro.
+
+                  See async_open.
+
+
+
+
+
+
+         async_breakrxd
+         ---------------------------------------------------------------
+
+         Purpose: Checks if a break signal has been received.
+
+         Format:  int async_breakrxd(port);
+                   ASYNC *port;       Pointer to ASYNC structure
+
+         Example:
+
+                  ASYNC *port;
+                  int break_status;
+
+                  break_status = async_breakrxd(port);
+
+
+         Returns: If a break signal has been received the function
+                  returns a non-zero value.  If a break has not been
+                  detected, zero is returned.
+
+         Remarks: Once a break signal has been detected, this function
+                  continually returns non-zero values until async_reset
+                  is called.  If a break is received, a line status
+                  register interrupt is generated.  The interrupt
+                  handler sets a bit in the Stat1 port structure member.
+                  The async_breakrxd function is a macro that checks the
+                  status of this bit.
+
+                  See also async_reset, async_rx, async_stat,
+                  async_sndbrk.
+
+
+
+
+
+
+         async_carrier
+         ---------------------------------------------------------------
+
+         Purpose: Check for the presence of a carrier.
+
+         Format:  int async_carrier(port);
+                   ASYNC *port;       Pointer to ASYNC structure
+
+         Example:
+
+                  ASYNC *port;
+                  int carrier_status;
+
+                  carrier_status = async_carrier(port);
+
+
+         Returns: A non-zero value is returned if a carrier is present.
+                  If the carrier detect line is LOW, zero is returned.
+
+         Remarks: This function is implemented as a macro.  See also
+                  async_rx and async_stat.
+
+
+
+
+
+
+         async_close
+         ---------------------------------------------------------------
+
+         Purpose: Closes a port opened by async_open.
+
+         Format:  int async_close(port);
+                   ASYNC *port;    Pointer to ASYNC structure
+
+         Example:
+
+                  ASYNC port;
+                  async_close(&port);
+
+         Returns: No return value
+
+         Remarks: Do not attempt to close an unopened port.  Some
+                  minimal checking is done internally by async_close in
+                  an attempt to detect whether or not the specified port
+                  is actually opened.  If an unopened port makes it past
+                  those checks and the main close routine is entered,
+                  the system may lock up (immediately, 2 hours later, or
+                  never).  When a port is closed the UART registers,
+                  interrupt controller mask, and interrupt vectors are
+                  restored to the value they had when async_open was
+                  called.  It is possible to close the port and leave
+                  various signals (DTR for one) in the state you desire
+                  rather than in their initial state.  See async_dtr and
+                  async_rts for some examples on how to do this.
+
+                  The B_ORGFIFO bit in the ASYNC 'Stat3' structure
+                  member is used by async_close to return the 16550 --
+                  if present -- to the mode it was in when async_open
+                  was called.  FIFOs may be 'forced' to remain enabled
+                  or 'forced' to be disabled when closing the port by
+                  first setting or resetting this bit.  Ex:
+
+                    Force off:    port->Stat3 &= ~B_ORGFIFO;
+                                  async_close(port);
+
+                    Force on:     port->Stat3 |= B_ORGFIFO;
+                                  async_close(port);
+
+
+
+
+
+
+         async_cts
+         ---------------------------------------------------------------
+
+         Purpose: Check status of the Clear to Send signal.
+
+         Format:  int async_cts(port);
+                   ASYNC *port;       Pointer to ASYNC structure
+
+         Example:
+
+                  ASYNC *port;
+                  int cts_status;
+
+                  cts_status = async_cts(port);
+
+         Returns: Returns zero if Clear To Send is LOW.  If CTS is HIGH,
+                  a non-zero value is returned.
+
+         Remarks: This function is implemented as a macro.
+
+
+
+
+
+
+         async_dsr
+         ---------------------------------------------------------------
+
+         Purpose: Check status of the Data Set Ready signal.
+
+         Format:  int async_dsr(port);
+                   ASYNC *port;       Pointer to ASYNC structure
+
+         Example:
+
+                  ASYNC *port;
+                  int dsr_status;
+
+                  dsr_status = async_dsr(port);
+
+         Returns: Returns zero if Data Set Ready is LOW.  If DSR is
+                  HIGH, a non-zero value is returned.
+
+         Remarks: This function is implemented as a macro.
+
+
+
+
+
+
+         async_dtr
+         ---------------------------------------------------------------
+
+         Purpose: Set or reset the Data Terminal Ready signal.
+
+         Format:  void async_dtr(port, DTRflag);
+                   ASYNC *port;       Pointer to ASYNC structure
+                   int DTRflag;       Set/Reset DTR flag
+
+         Example:
+
+                  ASYNC *port;
+
+                  if (WantToDropDTR)
+                      async_dtr(port, 0);
+                  else if (WantDTRhigh)
+                      async_dtr(port, 1);
+
+
+         Returns: No return value
+
+         Remarks: This signal is set HIGH when a port is first opened.
+                  When the port is closed, it is restored to the cond-
+                  ition it was in when the port was opened.  To force
+                  DTR low when a port is closed, regardless of its state
+                  when the port was opened, AND the port member, OldMCR,
+                  with NOT B_DTR.  To force DTR to remain high when the
+                  port is closed, OR OldMCR with B_DTR.
+
+                    Force low:    port->OldMCR &= ~B_DTR;
+                                  async_close(port);
+
+                    Force high:   port->OldMCR |= B_DTR;
+                                  async_close(port);
+
+
+
+
+
+
+         async_FIFOrxlvl  <5.20 addition>
+         ---------------------------------------------------------------
+
+         Purpose: Set the 16550 UART's receive trigger level.
+
+         Format:  void async_FIFOrxlvl(port, trigger_lvl);
+                   ASYNC *port;       Pointer to ASYNC structure
+                   int trigger_lvl;   Rx FIFO interrupt trigger level
+
+         Example:
+
+                  ASYNC *port;
+
+                   /* set the receiver trigger level to 8 bytes */
+                  async_FIFOrxlvl(port, 8);
+
+         Returns: No return value
+
+         Remarks: Valid values for 'trigger_lvl' are 1, 4, 8, and 14
+                  bytes.  When a port with a 16550 UART is first opened,
+                  the trigger level is set to 1 byte.  See the
+                  discussion on 'Use of receiver FIFOs' at the beginning
+                  of this document.  This function has no effect if the
+                  FIFOs were not enabled when async_open was called.
+
+
+
+
+
+
+         async_FIFOtxlvl  <5.20 addition>
+         ---------------------------------------------------------------
+
+         Purpose: Set the number of bytes loaded into the 16550 UART's
+                  transmit FIFOs when a transmit interrupt occurs.
+
+         Format:  void async_FIFOtxlvl(port, bytes);
+                   ASYNC *port;       Pointer to ASYNC structure
+                   int bytes;         # of bytes to load into tx FIFOs
+
+         Example:
+
+                  ASYNC *port;
+
+                   /* set the transmit FIFO byte level to 16 bytes */
+                  async_FIFOrxlvl(port, 16);
+
+         Returns: No return value
+
+         Remarks: Valid values for 'bytes' are 1 through 16 bytes.  When
+                  a port with a 16550 UART is first opened, the transmit
+                  level byte count is set to 3 bytes.  See the
+                  discussion on 'Use of transmit FIFOs' at the beginning
+                  of this document.  This function has no effect if the
+                  FIFOs were not enabled when async_open was called.
+
+
+
+
+
+
+         async_ignerr
+         ---------------------------------------------------------------
+
+         Purpose: Set or reset 'ignore characters with errors' bit
+
+         Format:  void async_ignerr(port, flag);
+                   ASYNC *port;       Pointer to ASYNC structure
+                   int flag;          Set/Reset flag
+
+         Example:
+
+                  ASYNC *port;
+
+                  if (WantToDiscardErrChars)
+                      async_ignerr(port, 1);
+                  else if (WantToKeepErrChars)
+                      async_ignerr(port, 0);
+
+
+         Returns: No return value
+
+         Remarks: This function sets the bit that determines what hap-
+                  pens to received characters that have parity or fram-
+                  ing errors.  If the function is called with the flag
+                  set to one, incoming characters that have framing or
+                  parity errors are discarded -- they do not get put
+                  into the receive ring buffer.  If the flag is 0, char-
+                  acters with errors are not ignored, they are put into
+                  the ring buffer.  The error bits in Stat1 that reflect
+                  these error conditions are set regardless of the
+                  setting of the discard flag.  When a port is first
+                  opened, the flag is set to 0.  This function is imple-
+                  mented as a macro.
+
+                  See also async_stat.
+
+
+
+
+
+
+         async_msr
+         ---------------------------------------------------------------
+
+         Purpose: Get the contents of the Modem Status Register.
+
+         Format:  int async_msr(port);
+                   ASYNC *port;       Pointer to ASYNC structure
+
+         Example:
+
+                  ASYNC *port;
+                  int MSRcontents;
+
+                  MSRcontents = async_msr(port);
+
+
+         Returns: The contents of the Modem Status Register.
+
+         Remarks: This function is a macro that returns the port struc-
+                  ture member, MSRVal.  This value is initialized when a
+                  port is first opened and then updated any time a modem
+                  status interrupt occurs.  The reason the MSR is not
+                  read directly is to avoid inadvertently intercepting a
+                  pending MSR interrupt.  All bits returned except for
+                  the delta bits reflect the true current status.
+
+
+
+
+
+
+         async_msrflow  <5.50 modified>
+         ---------------------------------------------------------------
+
+         Purpose: Enables or disables hardware flow control.
+
+         Format:  void async_msrflow(port, flowmask);
+                   ASYNC *port;       Pointer to ASYNC structure
+                   int flowmask;      Bit mapped flow control mask
+
+         Example:
+
+                  ASYNC *port;
+
+                  if (enable_RTS_CTS_handshake)
+                      async_msrflow(port, B_CTS);
+                  else if (disable_handshake)
+                      async_msrflow(port, 0);
+
+         Returns: No return value
+
+         Remarks: The flow mask is a bit mapped value of the signal that
+                  is monitored by the receiver when performing flow
+                  control.  Bits that may be monitored are B_CTS, B_DSR,
+                  and B_CD.  This provides capability for RTS/CTS hand-
+                  shake, DTR/DSR handshake, and handshaking with the
+                  carrier detect line.  To monitor multiple signals, OR
+                  the bits together.  Both hardware flow control and
+                  XON/XOFF flow control may be enabled at the same time.
+
+                  Beginning with version 5.50, ORing B_RTS into the
+                  'flowmask' parameter, will cause the RTS signal to be
+                  driven low whenever the receive buffer exceeds the
+                  XoffTrip point.  RTS will automatically return to its
+                  normal condition when the receive buffer empties to a
+                  point below the XonTrip level.  Both XOFF/XON and RTS
+                  flow control share the same trip point variable but
+                  may be activated separately or together.  Do not get
+                  RTS and CTS confused.  Use CTS to keep the computer
+                  from overrunning a device (e.g. sending to a modem
+                  with a locked baud rate).  Use RTS to keep from
+                  getting ran over by a device (receiving from a high
+                  speed modem using a slow computer).
+
+                  See async_xflow.
+
+
+
+
+
+
+         async_open  <5.40 modified -- see Remarks at end of function>
+         ---------------------------------------------------------------
+
+         Purpose: Initializes the hardware, interrupt vector, and ASYNC
+                  port structure for interrupt driven operation.
+
+         Format:
+                  int async_open(port, base, irqmask, vctrnbr, params);
+                   ASYNC *port;   Pointer to ASYNC structure
+                   int base;      Base port address of UART chip
+                   int irqmask;   8259 mask value for selected IRQ line
+                   int vctrnbr;   Number of selected interrupt vector
+                   char *params;  Baud, parity, data, & stop bits in
+                                   string format
+
+         Entry:   Before calling this function you must allocate ring
+                  buffer memory and pre-initialize the following ASYNC
+                  structure members:
+
+                   RxSize : the size that you want the receive ring
+                      buffer to be.  The memory allocated or set aside
+                      for the receive ring buffer must be contiguous
+                      with the memory used for the transmit  ring
+                      buffer.  In most cases (RxSize + TxSize) bytes
+                      will be allocated using some form of malloc.
+                      A function to do this is included in the examples.
+                      The combined size of RxSize + TxSize can not
+                      exceed 32K - 1.
+
+                   TxSize : the size of the transmit buffer in bytes.
+                      As stated above, the transmit and receive buffers
+                      for each individual port must be allocated as one
+                      contiguous block.
+
+                   RingSeg: the segment address of the memory allocated
+                      for the receive and transmit buffers.  FAR memory
+                      can be used for the receive and transmit buffers
+                      by using your compiler library's version of FAR
+                      malloc and putting the segment portion (high 16
+                      bits) of the returned memory pointer in RingSeg.
+                      If you are using a NEAR data model program and
+                      want NEAR ring buffers, set RingSeg equal to 0.
+                      With RingSeg set to zero, the open function will
+                      use the DS segment register for RingSeg.  Using
+                      FAR ring buffers causes no loss of performance.
+
+                  RingOfst: the offset address of the memory allocated
+                      for the receive and transmit buffers.  This value,
+                      in conjunction with the RxSize and TxSize vari-
+                      ables, is used to set up the receive and transmit
+                      ring buffers.
+
+
+
+
+
+
+         async_open
+         ---------------------------------------------------------------
+
+                  THE FOLLOWING FUNCTION IS INCLUDED WITH MCOMM5 AND IS
+                  RECOMMENDED FOR ALLOCATING RING BUFFER MEMORY AND
+                  INITIALIZING THE ABOVE VARIABLES.
+
+         #if defined (__TURBOC__)         /* Turbo C */
+            #include <alloc.h>
+            #define _fmalloc farmalloc
+         #elif defined (__ZTC__)          /* Zortech C */
+            #include <dos.h>
+            #include <stdlib.h>
+            #define _fmalloc farmalloc
+         #else                            /* Microsoft C */
+            #include <malloc.h>
+         #endif
+
+         int AllocRingBuffer(
+          ASYNC *port,                  /* pointer to port structure */
+          int rxsize,      /* number bytes to use for receive buffer */
+          int txsize,     /* number bytes to use for transmit buffer */
+          int useFARmem)    /* flag set if using FAR mem for buffers */
+         {
+            unsigned long memptr;
+            int memsize;
+
+            memsize = rxsize + txsize;
+
+            if (useFARmem || sizeof(char *) == 4)/* if FAR Ring bufs */
+               memptr = (unsigned long)_fmalloc(memsize);
+            else                  /* if Ring buffers use NEAR memory */
+               memptr = (unsigned long)(unsigned int)malloc(memsize);
+
+             /* pre-initialize 4 required structure members */
+            port->RxSize = rxsize;            /* receive buffer size */
+            port->TxSize = txsize;           /* transmit buffer size */
+            port->RingSeg = (int)(memptr >> 16);          /* SEG adr */
+            port->RingOfst = (int)memptr;            /* OFST address */
+            if (memptr == 0L)
+               return 0;          /* return 0 if no memory available */
+            return 1;                   /* return 1, had some memory */
+         }
+
+
+
+
+
+
+         async_open
+         ---------------------------------------------------------------
+
+         Example 1:
+
+            /*
+               Open COM1 at 2400,N,8,1 using FAR ring buffers. COM1 is
+               defined in COMM.H as:  0x3f8, 0x10, 12.  It is not
+               necessary to check the return value of AllocRingBuffer
+               since async_open will return R_NOMEM if the memory
+               allocation function fails.
+            */
+
+            #include "comm.h"
+
+            ASYNC port;
+            int rcode;
+
+            AllocRingBuffer(&port, 24000, 8000, 1);
+
+            rcode = async_open(&port, COM1, "2400N81");
+          /**  or
+            rcode = async_open(&port, 0x3f8, 0x10, 12, "2400N81");
+           **  or
+            rcode = async_open(&port, 0x3f8, IRQ4, VCTR4, "2400N81");
+           **/
+
+            if (rcode != R_OK)
+            {
+                printf("\nAsync_open failed, exit code = %d", rcode);
+                exit(rcode);
+            }
+
+
+
+
+
+
+         async_open
+         ---------------------------------------------------------------
+
+         Example 2:
+
+            /*
+               Open a port located at 0x2e0 that uses IRQ3.  In this
+               case NEAR ring buffers are specified and the memory for
+               the port structure is obtained using malloc.  See the
+               AllocRingBuffer function described previously.
+            */
+
+            #include "comm.h"
+
+            ASYNC *port;
+            int rcode;
+
+            if ((port = (ASYNC *)malloc(sizeof ASYNC)) == NULL)
+            {
+                printf("\nNot enough memory");
+                exit(R_NOMEM);
+            }
+
+            AllocRingBuffer(port, 4096, 1200, 0);
+
+            rcode = async_open(port, 0x2e0, IRQ3, VCTR3, "115200E71");
+
+            if (rcode != R_OK)
+            {
+                printf("\nAsync_open failed, exit code = %d", rcode);
+                exit(rcode);
+            }
+
+
+
+
+
+
+         async_open
+         ---------------------------------------------------------------
+
+         Example 3:
+
+            /*
+               Open both COM1 and COM2 at the same time.  You can open
+               two ports at once as long as they don't share the same
+               IRQ line or interrupt vector.
+            */
+
+            #include "comm.h"
+
+            ASYNC ports[2], *port[2];
+            int rcode;
+
+            port[0] = &ports[0], port[1] = &ports[1];
+
+            AllocRingBuffer(port[0], 10240, 10240, 1);
+            rcode = async_open(port[0], COM1, "9600N81");
+            if (rcode != R_OK)
+            {
+                printf("\nAsync_open failed, exit code = %d", rcode);
+                exit(rcode);
+            }
+
+            AllocRingBuffer(port[1], 10240, 10240, 1);
+            rcode = async_open(port[1], COM2, "1200E71");
+            if (rcode != R_OK)
+            {
+                printf("\nAsync_open failed, exit code = %d", rcode);
+                exit(rcode);
+            }
+
+
+
+
+
+
+         async_open
+         ---------------------------------------------------------------
+
+         Example 4:
+
+            /*
+               Open COM1 using its current baud, parity, data, and
+               stop bit settings.  The port structure member, BPDSstr,
+               will reflect those settings after calling async_open.
+            */
+
+            #include "comm.h"
+
+            ASYNC *port;
+            int rcode;
+
+             /* alloc port structure & ring buffer memory */
+            port = malloc(sizeof(ASYNC));
+            AllocRingBuffer(port, 4096, 2048, 1);
+
+             /* empty parameter string causes port to be opened at
+                its current settings  */
+            rcode = async_open(port, COM1, "");
+
+            if (rcode != R_OK)
+            {
+                printf("\nAsync_open failed, exit code = %d", rcode);
+                exit(rcode);
+            }
+
+            printf(
+             "\nBaud, parity, data, stop bits = %s\n", port->BPDSstr);
+
+
+
+
+
+
+         async_open
+         ---------------------------------------------------------------
+
+         Returns:
+
+                  R_OK (0) - the port was opened with no errors.
+
+                  R_NOMEM - a NULL pointer was passed as the address
+                      of the ring buffers.  Probable causes are either
+                      failing to initialize the port structure ring
+                      buffer variables or assigning the RingSeg and
+                      RingOfst structure a NULL pointer.  This could
+                      occur if you use the AllocRingBuffer function or
+                      something similar and the call to malloc fails.
+
+                  R_BAUDERR - the passed baud rate in the BPDS string
+                      was invalid.  Some possible reasons for this error
+                      are leading spaces in the parameter string or use
+                      of commas.  "115200N81" is correct. " 115200N81"
+                      and "115,200N81" are both incorrect.
+
+                  R_PARITYERR - an invalid character was found in the
+                      parameter string where the parity should have
+                      been.  Commas or spaces in the parameter string
+                      are possible causes.  Valid parity settings are N
+                      - none, E - even, or O - odd.  See R_BAUDERR.
+
+                  R_DTABITERR - an invalid number of data bits was spec-
+                      ified.  Only settings of 7 or 8 are supported.
+
+                  R_STPBITERR - an invalid number of stop bits was spec-
+                      ified.  Stop bits must be set to either 1 or 2.
+
+                  R_IRQUSED - an attempt was made to open two ports that
+                      use the same IRQ line.
+
+                  R_VCTRUSED - an attempt was made to open two ports
+                      that use the same interrupt vector.
+
+                  R_NOPORT - an attempt was made to open more than 2
+                      simultaneous ports.
+
+                  R_PORTUSED - an attempt was made to open two ports
+                      that have the same I/O address.
+
+                  R_UARTERR - an attempt was made to open a port that is
+                      stuck in an interrupt condition (see the notes on
+                      problems with the WD16550 at the beginning of this
+                      documentation ).
+
+
+
+
+
+
+         async_open
+         ---------------------------------------------------------------
+
+         Remarks (16550 support):
+
+                  This function now automatically detects the presence
+                  of a 16550 UART and enables FIFO operation if one is
+                  detected.  By ORing either 0x8000 or 0x4000 with the
+                  ComBase argument, you can change the default of auto-
+                  enabling FIFO mode.  If 0x8000 is ORed with the
+                  ComBase argument (ex: 0x8000|0x3f8), no attempt is
+                  made to detect a 16550 and no changes are made to the
+                  mode of operation of the 16550 if one is present.  If
+                  this bit is set, none of the functions or bits
+                  relating to the 16550 UART will be valid.  If 0x4000
+                  is ORed with the ComBase, the 16550 will be forced
+                  into non-FIFO mode.
+
+                  ORing 0x2000 with the ComBase parameter will open the
+                  port with MSR interrupts disabled.  ORing the ComBase
+                  parameter with 0x1000 will open the port with LSR
+                  interrupts disabled.  See the notes on the WD16550 at
+                  the beginning of this documentation for why this may
+                  be desired and the side effects of opening a port with
+                  MSR interrupts disabled.
+
+                  When async_open is called, the FIFOs are momentarily
+                  disabled and then re-enabled with the receive trigger
+                  level set to 1 byte.  In versions of MCOMM prior to
+                  5.40, the FIFOs were not reset if they were already
+                  on.  Resetting the FIFOs was added to correct
+                  occasional rare problems with the port not opening.
+
+                    /* detect 16550, enable FIFOs if present */
+                  async_open(PortPtr, 0x3f8, IRQ, Vector, Params);
+
+                   /* do not attempt to detect 16550 */
+                  async_open(PortPtr, 0x8000|0x3f8, IRQ, Vctr, Params);
+
+                   /* detect 16550, disable FIFOs if present */
+                  async_open(PortPtr, 0x4000|0x3f8, IRQ, Vctr, Params);
+
+                   /* open port, disable MSR interrupts */
+                  async_open(PortPtr, 0x2000|0x3f8, IRQ, Vctr, Params);
+
+                   /* open port, disable MSR interrupts and FIFOs */
+                  async_open(PortPtr, 0x6000|0x3f8, IRQ, Vctr, Params);
+
+
+
+
+
+
+         async_open
+         ---------------------------------------------------------------
+
+         Remarks (versions previous to 5.00):
+
+                  There are some major differences in the async_open
+                  function in MCOMM5 and previous versions of the rou-
+                  tines.  The two most major ones are that the parame-
+                  ters passed to the function are different and it is
+                  now necessary to allocate the memory for the ring
+                  buffers before calling the function.  To make things
+                  simpler, COM1 and COM2 are defined in COMM.H and the
+                  function, AllocRingBuffer, is provided.  The COM1 and
+                  COM2 definitions satisfy the requirements for the 2nd,
+                  3rd, and 4th parameters required by the function.  For
+                  ports other than the standard COM1 and COM2, it is
+                  necessary to list the individual arguments.  The func-
+                  tion, AllocRingBuffer, is provided in C source form on
+                  the disk and included in the COMM_x libraries.  This
+                  function allocates the ring buffer memory and initial-
+                  izes the required port structure members.
+
+                  The return values for async_open are different and may
+                  have a different meaning than in earlier versions.
+
+                  If a port is opened with an empty parameter string
+                  (using "" for the parameters), then the port is opened
+                  at its current settings and the port member BPDSstr is
+                  set to the string representation of those values.
+
+                  Async_open no longer checks the BIOS ram area at 40:0
+                  to verify that a port actually exists.  There were too
+                  many compatibles that did not store the proper values
+                  there.
+
+                  The maximum combined size of the receive and transmit
+                  buffers for each port is 32K - 1.
+
+                  FAR ring buffers in small and medium memory model
+                  programs is now supported.  Use of FAR buffers does
+                  not in any way affect the speed of the routines.
+
+
+
+
+
+
+         async_peek
+         ---------------------------------------------------------------
+
+         Purpose: Indexed receive ring buffer look ahead function.
+
+         Format:  int async_peek(port, index);
+                   ASYNC *port;       Pointer to ASYNC structure
+                   int index;         Index value
+
+         Examples:
+
+                  ASYNC *port;
+                  char ch, buf[10];
+                  int i;
+
+                   /* peek next char in receive ring buffer */
+                  ch = async_peek(port, 0);
+
+                   /* peek next 10 chars in receive ring buffer */
+                  for (i = 0; i < 10; i++)
+                      buf[i] = async_peek(port, i);
+
+         Returns: This function returns the character in the receive
+                  ring buffer at the indexed position.  If an attempt is
+                  made to peek deeper in the ring buffer than there are
+                  characters in the ring buffer, -1 (0xffff) is
+                  returned.
+
+         Remarks: No characters are removed from the ring buffer by this
+                  function.
+
+                  The index value is 0 based.
+
+                  To avoid confusing the character, '\0xff', from the
+                  error return value, 0xffff, use an integer size
+                  variable for the return value.  The character '\0xff'
+                  is returned as 0x00ff and the error condition is
+                  returned as 0xffff.
+
+
+
+
+
+
+         async_regs
+         ---------------------------------------------------------------
+
+         Purpose: Provides direct access to the UART registers.
+
+         Format:  int async_regs(port, reg_ofst, value);
+                   ASYNC *port;       Pointer to ASYNC structure
+                   int reg_ofst;      Offset of register from base adrs
+                   int value;         Value to write or -1 if reading
+
+         Examples:
+
+                  ASYNC *port;
+                  int LCRvalue;
+
+                   /* read the line control register */
+                  LCRvalue = async_regs(port, LCRreg, RDreg);
+
+                   /* write a 0 to the modem control register */
+                  async_regs(port, MCRreg, 0);
+
+         Returns: When reading a register, the return value is the value
+                  of the UART register that was read.  When writing a
+                  register, the return value is undefined.
+
+         Remarks: The following values for register offsets are defined
+                  in COMM.H for use with async_regs:
+                    RXreg, TXreg - receive & transmit regs, value = 0
+                    IERreg - interrupt enable register,     value = 1
+                    IIDreg - interrupt identification reg,  value = 2
+                    FCRreg - FIFO control register          value = 2
+                    LCRreg - line control register,         value = 3
+                    MCRreg - modem control register,        value = 4
+                    LSRreg - line status register,          value = 5
+                    MSRreg - modem status register,         value = 6
+                    LObaud - offset of low baud divisor,    value = 0
+                    HIbaud - offset of high baud divisor,   value = 1
+                  Also RDreg is defined as -1 for use when reading one
+                  of the UART registers.  See the examples.  See
+                  cautions on the following page before using this
+                  function.
+
+
+
+
+
+
+         async_regs
+         ---------------------------------------------------------------
+
+         Remarks (continued):
+
+                  This function is provided primarily as a debugging
+                  tool.  Reading or writing to the UART registers while
+                  operating in an interrupt driven mode can cause
+                  several types of problems.  Do not use this function
+                  unless you know what you are doing.  Do not read the
+                  RXreg, IIDreg, LSRreg, or MSRreg on an open port
+                  except for debugging purposes.  Do not write any of
+                  the registers.
+
+                  The function may be used on a port that has not yet
+                  been opened if the ComBase member of the port struc-
+                  ture has been set.  When async_regs is used with an
+                  unopened port the UART registers may be read or writ-
+                  ten without restriction.
+
+
+
+
+
+
+         async_reset
+         ---------------------------------------------------------------
+
+         Purpose: Clear parity error bit, framing error bit, character
+                  overrun bit, receive buffer overflow bit, and break
+                  signal received bit in the the Stat1 byte.
+
+         Format:  void async_reset(port);
+                   ASYNC *port;       Pointer to ASYNC structure
+
+         Example:
+
+                  ASYNC *port;
+
+                  if (error)
+                      async_reset(port);
+
+
+         Returns: No return value
+
+         Remarks: This function is implemented as a macro.  See also
+                  async_rx and async_stat.
+
+
+
+
+
+
+         async_restart
+         ---------------------------------------------------------------
+
+         Purpose: Re-initialize an already opened serial port
+
+         Format:  void async_restart(port);
+                   ASYNC *port;       Pointer to ASYNC structure
+
+         Example:
+
+                  ASYNC *port;
+
+                  async_restart(port);
+
+
+         Returns: No return value
+
+         Remarks: Async_restart resets the interrupt vector, UART regis-
+                  ters, and 8259 interrupt controller mask to the values
+                  necessary for interrupt driven operation.  It also
+                  flushes the receive and transmit buffers and resets
+                  the Stat1 byte.  Use this function to restart a comm
+                  port after spawning a program that may have altered
+                  the interrupt vector, UART regs, or interrupt mask.
+
+                  See also async_stop.
+
+
+
+
+
+
+         async_rts
+         ---------------------------------------------------------------
+
+         Purpose: Sets or resets the Request to Send signal.
+
+         Format:  void async_rts(port, flag);
+                   ASYNC *port;       Pointer to ASYNC structure
+                   int flag;          Set/Reset RTS flag
+
+         Example:
+
+                  ASYNC *port;
+
+                  if (WantToDropRTS)
+                      async_rts(port, 0);
+                  else if (WantRTShigh)
+                      async_rts(port, 1);
+
+
+         Returns: No return value
+
+         Remarks: The RTS signal is primarily used for hardware hand-
+                  shaking.  When a port is first opened RTS is set HIGH
+                  (enabled).  When the port is closed, it is restored to
+                  the condition it was in when the port was opened.  To
+                  force RTS low when closing a port, regardless of its
+                  state when the port was opened, AND the port member,
+                  OldMCR with NOT B_RTS.  To force RTS to remain high
+                  when the port is closed, OR OldMCR with B_RTS.
+
+                    Force low:    port->OldMCR &= ~B_RTS;
+                                  async_close(port);
+
+                    Force high:   port->OldMCR |= B_RTS;
+                                  async_close(port);
+
+
+
+
+
+
+         async_rx
+         ---------------------------------------------------------------
+
+         Purpose: Gets one character from the receive ring buffer.
+
+         Format:  int async_rx(port);
+                   ASYNC *port;       Pointer to ASYNC structure
+
+         Examples:
+
+                  ASYNC *port;
+                  int rxch;
+
+                  rxch = async_rx(port);       /* rxch == Stat1/char */
+
+                  rxch = async_rx(port) & 0xff;      /* rxch == char */
+
+                   /* chk if char available & process only if it was */
+                  if (!((rxch = async_rx(port)) & B_RXEMPTY)
+                      procRxdChar(rxch & 0xff);
+
+         Returns: Async_rx returns the character received as the low
+                  byte and the Stat1 status byte as the high byte.  If
+                  the receive ring buffer was empty when async_rx was
+                  called the low byte will be 0 and the high byte will
+                  have the B_RXEMPTY bit set.  The Stat1 byte is a bit
+                  mapped value that reflects parity errors, framing
+                  errors, character overrun errors, receive buffer
+                  overflow errors, receive buffer empty, break signal
+                  received, and carrier lost.  If no receive errors
+                  have occurred, a break signal has not been received,
+                  and a carrier is present, Stat1 will be 0.
+
+
+
+
+
+
+         async_rx
+         ---------------------------------------------------------------
+
+         Remarks: Error bits set in the Stat1 byte are not necessarily
+                  associated with the character just taken out of the
+                  receive ring buffer.  In fact, they probably are not.
+                  The error bits are set when the error is detected and
+                  reset when async_reset is called.  For example:
+
+                   1) 20 bytes of data are received with no errors.
+                   2) Async_rx has been called 10 times so 10 characters
+                      have been taken out of the ring buffer and 10 of
+                      the bytes with no errors are still in the buffer.
+                   3) A parity error occurs on the next byte received
+                      from the UART -- the 11th byte in the receive ring
+                      buffer.
+                   4) The next byte taken out of the buffer, which is
+                      the first of the 10 remaining good bytes will have
+                      the parity error bit in the Stat1 byte.  It will
+                      remain set until async_reset is called.
+
+                  If the 'ignore characters with errors' bit is set (see
+                  async_ignerr), then characters that have either parity
+                  or framing errors are never placed in the receive ring
+                  buffer.  They are read from the UART and discarded.
+                  The error bits in Stat1 are set regardless of the
+                  setting of the 'ignore characters with errors' bit.
+
+
+
+
+
+
+         async_rxblk
+         ---------------------------------------------------------------
+
+         Purpose: Retrieves a block of characters from the receive ring
+                  buffer.
+
+         Format:  int async_rxblk(port, buf, maxchars);
+                   ASYNC *port;       Pointer to ASYNC structure
+                   char *buf;         Buffer for received data
+                   int maxchars;      Maximum number of chars to read
+
+         Example:
+
+                  ASYNC *port;
+                  char buf[256];
+                  int bytesRead;
+
+                  bytesRead = async_rxblk(port, buf, sizeof(buf));
+
+         Returns: Async_rxblk returns the number of bytes read.  This
+                  value will be 'maxchars' if there are that many bytes
+                  available in the receive buffer.  If there are not
+                  'maxchars' in the receive buffer, the entire contents
+                  of the receive buffer will be moved to 'buf' and the
+                  return value will be the number of bytes that were in
+                  the buffer.
+
+         Remarks: Very fast way to read data.  See also async_rx and
+                  async_rxblkch.
+
+
+
+
+
+
+         async_rxblkch
+         ---------------------------------------------------------------
+
+         Purpose: Retrieve bytes from the receive ring buffer until the
+                  specified character is found, 'maxchars' are read, or
+                  the receive ring buffer is emptied.
+
+         Format:
+           int async_rxblkch(port, buf, maxchars, keychar, includekey);
+            ASYNC *port;      Pointer to ASYNC structure
+            char *buf;        Destination for bytes read
+            int maxchars;     Maximum number of chars to read
+            char keychar;     Character to scan for
+            int includekey;   Flag set if 'keychar' is to be read also
+
+         Example:
+
+           ASYNC *port;
+           char buf[256];
+           int bytesRead;
+           int foundkey;
+
+           bytesRead = async_rxblkch(port, buf, sizeof(buf), '\n', 1);
+           if (bytesRead < 0)
+               bytesRead = -bytesRead, foundkey = TRUE;
+            else
+               foundkey = FALSE;
+
+         Returns: This function returns the number of bytes read if the
+                  'keychar' is not found.  If the 'keychar' is found the
+                  2's complement of the number of bytes read is
+                  returned.
+
+
+
+
+
+
+         async_rxblkch
+         ---------------------------------------------------------------
+
+         Remarks: The 'includekey' flag, which is the last argument of
+                  the function, determines whether or not the 'keychar'
+                  is to be included if it is found.  If the flag is 1
+                  and the 'keychar' is found it will be the last char-
+                  acter in the user buffer.  If this flag is 0 and the
+                  'keychar' is found, the 'keychar' is left in the re-
+                  ceive ring buffer and will be the first character read
+                  when you next call one of the async_rx type functions.
+                  This can cause a problem if you set this flag to 0 and
+                  the 'keychar' is the first character in the receive
+                  buffer.  The function will return 0, which would seem
+                  to indicate that there were no bytes in the buffer.
+                  Actually the character was found but since you are not
+                  taking it out of the ring buffer zero bytes are read.
+                  There are two ways to check for this condition.  You
+                  can first call async_rxcnt to verify there are bytes
+                  in the receive buffer and then call async_rxblkch.  If
+                  async_rxblkch returns 0, the 'keychar' is there and is
+                  the first byte in the buffer.  The other method is to
+                  use async_peek to see what the next character in the
+                  receive buffer is before calling async_rxblkch.
+
+                  A 2's complement value of the bytes read is returned
+                  by async_rxblkch when the 'keychar' is found.  For
+                  actual bytes use:
+                      bytes = async_rxblkch( ....);
+                      if (bytes < 0)
+                          bytes = -bytes;
+                  A byte count less than zero is the signal the
+                  'keychar' was found.  (Except for the circumstance
+                  noted in the previous paragraph).
+
+                  See async_rx, async_rxblk, async_rxcnt, async_peek.
+
+
+
+
+
+
+         async_rxcnt
+         ---------------------------------------------------------------
+
+         Purpose: Returns the number of bytes in the receive ring
+                  buffer.
+
+         Format:  int async_rxcnt(port);
+                   ASYNC *port;       Pointer to ASYNC structure
+
+         Example:
+
+                  ASYNC *port;
+
+                  BytesInRxBuf = async_rxcnt(port);
+
+         Returns: Number of bytes in the receive ring buffer
+
+         Remarks: This function is implemented as a macro.
+
+
+
+
+
+
+         async_rxerr
+         ---------------------------------------------------------------
+
+         Purpose: Checks if a receive error has been detected.
+
+         Format:  int async_rxerr(port);
+                   ASYNC *port;       Pointer to ASYNC structure
+
+         Example:
+
+                  ASYNC *port;
+                  int rxerr_status;
+
+                  rxerr_status = async_rxerr(port);
+
+         Returns: ZR if no receive errors have been detected, NZ if
+                  receive error has been detected.
+
+         Remarks: Types of receive errors that are detected by this
+                  function are parity errors, framing errors, UART
+                  receive register overflow, and receive ring buffer
+                  overflow.  This information is also returned as the
+                  high byte of the async_rx and async_stat functions.
+                  This function is implemented as a macro.
+
+                  See also async_rx, async_stat.
+
+
+
+
+
+
+         async_rxflush
+         ---------------------------------------------------------------
+
+         Purpose: Empties out the receive ring buffer.
+
+         Format:  void async_rxflush(port);
+                   ASYNC *port;       Pointer to ASYNC structure
+
+         Example:
+
+                  ASYNC *port;
+
+                  async_rxflush(port);
+
+         Returns: This function does not have a return value
+
+         Remarks: Clears the receive ring buffer and -- if a 16550 is
+                  present in the system with its FIFOs activated --
+                  resets the receiver FIFOs.  All data that was in the
+                  buffer is lost.  If XON/XOFF flow control is being
+                  used and an XOFF has been sent to the remote, this
+                  function automatically sends an XON.  An XON is not
+                  ALWAYS sent -- only if XFLOW control is in use and the
+                  async interrupt routine has sent an XOFF.  It will not
+                  clear false XOFFs the remote may have received.
+
+
+
+
+
+
+         async_rxfree (5.40)
+         ---------------------------------------------------------------
+
+         Purpose: Returns the number of bytes left available in the
+                  receive ring buffer for incoming characters.
+
+         Format:  int async_rxfree(port);
+                   ASYNC *port;       Pointer to ASYNC structure
+
+         Example:
+
+                  ASYNC *port;
+
+                   RxBufFreeSpace = async_rxfree(port);
+
+         Returns: Number of bytes that can be received without taking
+                  any out before a receive buffer overflow will occur.
+
+         Remarks: This function is implemented as a macro.
+
+
+
+
+
+
+         async_setbpds
+         ---------------------------------------------------------------
+
+         Purpose: Change the baud rate, parity, number of data bits or
+                  number of stop bits on an already opened port.
+
+         Format:  int async_setbpds(port, params);
+                   ASYNC *port;       Pointer to ASYNC structure
+                   char *params;      Pointer to parameter string
+
+         Example:
+
+                  ASYNC *port;
+                  int rcode;
+
+                  rcode = async_setbpds(port, "2400E71");
+
+         Returns: This function returns 0 if successful and the new
+                  parameter string is copied to the port structure
+                  member, BPDSstr.  Errors that can be returned are
+                  R_BAUDERR, R_PARITYERR, R_DTABITERR, or R_STPBITERR.
+                  If one of these error codes are returned, the port
+                  settings are unchanged and the port member BPDSstr is
+                  left unchanged.
+
+                  See async_open for a more complete description of
+                  these errors.
+
+         Remarks: If 7 data bits is selected the StripMask is set to
+                  strip the high bit off incoming data.  If 8 data bits
+                  are selected the StripMask is disabled.
+
+                  Valid baud rates are from 50 to 115200 baud.  Parity
+                  may be 'E'ven, 'N'one, or 'O'dd.  The number of data
+                  bits must be 7 or 8 and the number of stop bits must
+                  be 1 or 2.  Do not use spaces, commas, or any other
+                  type of punctuation in the parameter string.
+
+                  See also async_open, async_strip.
+
+
+
+
+
+
+         async_sndbrk
+         ---------------------------------------------------------------
+
+         Purpose: Enable or disable a break signal
+
+         Format:  void async_sndbrk(port, Brkflag);
+                   ASYNC *port;       Pointer to ASYNC structure
+                   int Brkflag;       Set/Reset break signal flag
+
+         Example:
+
+                  ASYNC *port;
+
+                   /* send break for 50 msec */
+                  async_sndbrk(port, 1); /* enable break signal */
+                  delay(50MSEC);         /* your delay function */
+                  async_sndbrk(port, 0); /* disable break signal */
+
+
+         Returns: No return value
+
+         Remarks: This function causes the UART to send a continuous
+                  break signal if it is called with the flag set to 1.
+                  It must be called again with the flag set to 0 to
+                  disable the break signal.
+
+
+
+
+
+
+         async_stat
+         ---------------------------------------------------------------
+
+         Purpose: Get the current status of a port
+
+         Format:  int async_stat(port, mask);
+                   ASYNC *port;       Pointer to ASYNC structure
+                   int mask;          Mask applied to return value
+
+         Examples:
+
+                  ASYNC *port;
+                  int status;
+
+                   /* status = all status bits */
+                  status = async_stat(port, 0xffff);
+
+                   /* check for XOFF received condition */
+                  if (async_stat(port, B_XRXD))
+                      do_something();
+
+
+         Returns: Returns Stat1/Stat2 status bits after masking them
+                  with the passed mask value.  Stat1 is the high byte
+                  and Stat2 is the low byte of the return value.
+
+                  Stat1 bit map:
+                      Bit 7 = set if no carrier present
+                      Bit 6 = receive ring buffer empty
+                      Bit 5 = used by interrupt routines (always 0)
+                      Bit 4 = break signal was detected
+                      Bit 3 = framing error was detected
+                      Bit 2 = parity error was detected
+                      Bit 1 = character overrun error was detected
+                      Bit 0 = receive ring buffer has overflowed
+
+                  Stat2 bit map:
+                      Bit 7 = carrier detect monitored for flow control
+                      Bit 6 = XOFF rx'd or hardware flow control active
+                      Bit 5 = data set ready monitored for flow control
+                      Bit 4 = clear to send monitored for flow control
+                      Bit 3 = transmit ring buffer is empty
+                      Bit 2 = an XOFF has been sent by interrupt handler
+                      Bit 1 = an XOFF has been received
+                      Bit 0 = using XON/XOFF flow control
+
+
+
+
+
+
+         async_stat
+         ---------------------------------------------------------------
+
+         Remarks: For some situations, it is more efficient to use one
+                  of the other library functions targeted specifically
+                  for the information you want.  For instance, instead
+                  of calling:
+                       async_stat(port, B_XRXD);
+                  use:
+                       async_xrxd(port);
+
+                  The information in the Stat1 byte is also returned as
+                  the high byte of the async_rx function.  Bits 0-4 of
+                  Stat1 remain set until cleared by the async_reset
+                  function.
+
+                  Not all bits in the Stat2 and Stat1 port structure
+                  members are kept updated on a constant basis so do not
+                  try to check a condition by testing the Stat1 or Stat2
+                  values in the ASYNC structure.  Use one of the docu-
+                  mented functions or macros to be sure of getting the
+                  correct result.
+
+
+
+
+
+
+         async_stop
+         ---------------------------------------------------------------
+
+         Purpose: Temporarily disables interrupt driven operation of an
+                  already opened port.
+
+         Format:  void async_stop(port);
+                   ASYNC *port;       Pointer to ASYNC structure
+
+         Example:
+
+                  ASYNC *port;
+                  int x, inhdl, outhdl, errhdl;
+
+                  async_stop(port);               /* release port */
+                   /* redirect console to async port */
+                  x = open("COM1", O_RDWR|O_BINARY);
+                  inhdl = dup(0);  outhdl = dup(1);  errhdl = dup(2);
+                  dup2(x, 0);  dup2(x, 1);  dup2(x, 2);
+                   /* run a redirected DOS shell */
+                  spawnlp(P_WAIT, "COMMAND.COM", "COMMAND.COM", NULL);
+                   /* restore stdin, stdout, stderr */
+                  close(x);
+                  dup2(inhdl, 0);   close(inhdl);
+                  dup2(outhdl, 1);  close(outhdl);
+                  dup2(errhdl, 2);  close(errhdl);
+                  async_restart(port);   /* regain control of port */
+
+         Returns: No return value
+
+         Remarks: Call this function before spawning a program that will
+                  be doing its own port I/O, such as an external commun-
+                  ications program or a redirected DOS shell.  After the
+                  other application has completed, call async_restart to
+                  re-enable interrupt operation.
+
+                  This function disables interrupts for the named port
+                  by clearing UART's interrupt enable register and the
+                  OUT2 bit of its modem control register.
+
+                  See also async_restart.
+
+
+
+
+
+
+         async_strip
+         ---------------------------------------------------------------
+
+         Purpose: Set the strip mask for received characters.
+
+         Format:  void async_strip(port, mask);
+                   ASYNC *port;       Pointer to ASYNC structure
+                   char mask;         Strip mask
+
+         Example:
+
+                  ASYNC *port;
+
+                  async_strip(port, '\x7f');
+
+         Returns: No return value
+
+         Remarks: The strip mask is automatically set to 0x7f when the
+                  parameters are set for 7 data bits and to 0xff when 8
+                  data bits are used.  All incoming data is ANDed with
+                  the strip mask before it is placed in the receive ring
+                  buffer.  This function is implemented as a macro.
+
+
+
+
+
+
+         async_tx
+         ---------------------------------------------------------------
+
+         Purpose: Send 1 character to a port.
+
+         Format:  int async_tx(port, ch);
+                   ASYNC *port;       Pointer to ASYNC structure
+                   char ch;           Character to transmit
+
+         Example:
+
+                  ASYNC *port;
+
+                   /* send a CR/LF to a port */
+                  async_tx(port, '\r');
+                  async_tx(port, '\n');
+
+
+         Returns: Returns the number of bytes left available in the
+                  transmit ring buffer unless the ring buffer was full
+                  when the function was called.  R_TXERR is returned if
+                  the transmit ring buffer was full and the character
+                  that was to be transmitted is not placed in the ring
+                  buffer.
+
+         Remarks: The error return value, R_TXERR, is a negative number.
+                  The bytes free return value can never be negative.
+
+                  See also async_txblk, async_txfree.
+
+
+
+
+
+
+         async_txblk
+         ---------------------------------------------------------------
+
+         Purpose: Send a block of characters to a port.
+
+         Format:  int async_txblk(port, buf, count);
+                   ASYNC *port;       Pointer to ASYNC structure
+                   char *buf;         Pointer to block to transmit
+                   int count;         Size of block in bytes
+
+         Examples:
+
+                  ASYNC *port;
+                  char buf[128];
+                  static char *msg = "Send this message\r\n");
+
+                  put_data_in_buf();
+                  async_txblk(port, buf, sizeof(buf));
+                  async_txblk(port, msg, strlen(msg));
+
+         Returns: Returns the number of bytes left available in the
+                  transmit ring buffer unless the ring buffer would not
+                  hold the entire block when the function was called.
+                  R_TXERR is returned if there was no room for the
+                  block and none of the bytes in the block are sent.
+
+         Remarks: This function is much faster than using repeated calls
+                  to async_tx when multiple bytes are being transmitted.
+                  The error return value, R_TXERR, is a negative number.
+                  The bytes free return value can never be negative.
+
+                  See also async_tx, async_txfree.
+
+
+
+
+
+
+         async_txcnt (5.40)
+         ---------------------------------------------------------------
+
+         Purpose: Returns the number of bytes in the transmit ring
+                  buffer.
+
+         Format:  int async_txcnt(port);
+                   ASYNC *port;       Pointer to ASYNC structure
+
+         Example:
+
+                  ASYNC *port;
+
+                  BytesInTxBuf = async_txcnt(port);
+
+         Returns: Number of untransmitted bytes in the transmit ring
+                  buffer.
+
+         Remarks: This function is implemented as a macro.  If a 16550
+                  is in the system with its FIFOs active, there may be
+                  up to 16 (depends on what async_FIFOtxlvl is set at --
+                  the default is 3 bytes) more bytes of untransmitted
+                  data in the 16550 FIFOs plus 1 byte in the UART
+                  transmit hold register.  With no 16550 there may still
+                  be up to 2 untransmitted bytes -- one in the UART's
+                  transmit hold register and one in the UART's transmit
+                  shift register.  To monitor for a transmit buffer
+                  empty condition use async_txempty.
+
+
+
+
+
+
+         async_txempty
+         ---------------------------------------------------------------
+
+         Purpose: Checks if transmit ring buffer is empty.
+
+         Format:  int async_txempty(port);
+                   ASYNC *port;       Pointer to ASYNC structure
+
+         Example:
+
+                  ASYNC *port;
+
+                   /* wait for transmit ring buffer to empty out */
+                  while (!async_txempty(port))
+                      ;
+
+         Returns: NZ if the transmit ring buffer is empty, ZR if the
+                  buffer still has characters to be transmitted.
+
+         Remarks: This function is implemented as a macro.  If a 16550
+                  is in the system with its FIFOs active, there may be
+                  up to 16 (depends on what async_FIFOtxlvl is set at --
+                  the default is 3 bytes) more bytes of untransmitted
+                  data in the 16550 FIFOs plus 1 byte in the UART
+                  transmit hold register.  With no 16550 there may still
+                  be up to 2 untransmitted bytes -- one in the UART's
+                  transmit hold register and one in the UART's transmit
+                  shift register.
+
+
+
+
+
+
+         async_txflush
+         ---------------------------------------------------------------
+
+         Purpose: Flushes the transmit ring buffer.
+
+         Format:  void async_txflush(port);
+                   ASYNC *port;       Pointer to ASYNC structure
+
+         Example:
+
+                  ASYNC *port;
+
+                  async_txflush(port);
+
+
+         Returns: No return value
+
+         Remarks: Clears the transmit ring buffer and -- if a 16550
+                  operating in FIFO mode is in the system -- resets the
+                  transmit FIFOs.  All characters in the buffer that
+                  have not been transmitted are lost.
+
+
+
+
+
+
+         async_txfree
+         ---------------------------------------------------------------
+
+         Purpose: Returns the number of bytes left available in the
+                  transmit ring buffer.
+
+         Format:  int async_txfree(port);
+                   ASYNC *port;       Pointer to ASYNC structure
+
+         Example:
+
+                  ASYNC *port;
+                  int tx_bytes_available;
+
+                  tx_bytes_available = async_txfree(port);
+
+
+         Returns: Number of bytes of free space left in the transmit
+                  buffer.
+
+         Remarks: The number of free bytes left in the transmit ring
+                  buffer is also the return value of async_tx and
+                  async_txblk.  This function is implemented as a macro.
+
+
+
+
+
+
+         async_xany
+         ---------------------------------------------------------------
+
+         Purpose: Checks if accepting the first character after an XOFF
+                  is received as the XON character.  DOES NOT enable any
+                  character XON (use async_xflow).
+
+         Format:  int async_xany(port);
+                   ASYNC *port;       Pointer to ASYNC structure
+
+         Example:
+
+                  ASYNC *port;
+                  int rcode;
+
+                  rcode = async_xany(port);
+
+         Returns: Not zero if first character after an XOFF is to be
+                  treated as an XON.  Zero if a real XON is required to
+                  clear an XOFF.
+
+         Remarks: This function is implemented as a macro.  See also
+                  async_xflow.
+
+
+
+
+
+
+         async_xflow
+         ---------------------------------------------------------------
+
+         Purpose: Enables/disables use of XON/XOFF flow control.
+
+         Format:  void async_xflow(port, flag);
+                   ASYNC *port;       Pointer to ASYNC structure
+                   int flag;          Enable/Disable & any char XON flag
+
+         Examples:
+
+                  ASYNC *port;
+
+                  async_xflow(port, B_XUSE); /* use flow control */
+                  async_xflow(port, 0);      /* disable flow control */
+
+                   /* use XON/XOFF flow control with any char being
+                      accepted as an XON */
+                  async_xflow(port, B_XUSE | B_XONANY);
+
+                   /* enable XON/XOFF on transmit side only */
+                  async_xflow(port, B_XUSET);
+
+                   /* enable XON/XOFF on receive side only */
+                  async_xflow(port, B_XUSER);
+
+         Returns: No return value
+
+         Remarks: Passing B_XUSET enables the transmission of XON/XOFF
+                  characters when the receive buffer fills to the 'trip'
+                  levels discussed in the following paragraph.  Incoming
+                  XON/XOFFs are not regarded as flow control characters
+                  and are stored in the ring buffer.  Passing B_XUSER,
+                  enables recognition of received XON/XOFFs as flow
+                  characters but does not enable transmission of
+                  XON/XOFF at the trip levels.  If B_XUSE is passed,
+                  both transmission and recognition of XON/XOFF as flow
+                  characters is enabled (the same as B_XUSET | B_XUSER).
+                  ORing B_XONANY with either B_XUSE or B_XUSER causes
+                  the first character received after an XOFF to be
+                  treated as the XON unless that character is another
+                  XOFF.  Passing zero as the flag disables XON/XOFF flow
+                  control.  The default is no flow control.
+
+
+
+
+
+
+         async_xflow
+         ---------------------------------------------------------------
+
+         Remarks (continued):
+
+                  The port structure member, XoffTrip, determines when
+                  an XOFF will be sent.  Whenever the number of bytes
+                  left available in receive buffer falls below XoffTrip,
+                  an XOFF is sent.  The default value of XoffTrip is 25%
+                  of the size of the receive buffer so an XOFF is sent
+                  whenever the receive buffer is 75% full.
+
+                  The port structure member, XonTrip, determines when an
+                  XON will be sent.  Whenever the number of bytes left
+                  available in the receive buffer rises above XonTrip,
+                  an XON will be sent.  Its default value is 50% of the
+                  size of the receive buffer.
+
+                  The port structure member, XTxRptInit, determines how
+                  many bytes may be received after an XOFF is sent
+                  before another XOFF is sent.  Its default value is
+                  6.25% of the size of the receive buffer or 160 bytes,
+                  whichever is less.
+
+                  XoffTrip, XonTrip, and XTxRptInit may all be changed
+                  from their default values by directly accessing the
+                  port structure.  To do this:
+
+                      ASYNC *port;
+                     /* send XOFF when 300 bytes left in rx ring buf */
+                      port->XoffTrip = 300;
+                     /* send XON when 350 bytes left in rx ring buf */
+                      port->XonTrip = 350;
+
+                  Be sure to keep the XonTrip level higher than the
+                  XoffTrip level.  The values are for bytes left
+                  available not bytes used.
+
+                  The XTxRptInit value is used to automatically send
+                  another XOFF in the event the first one was ignored.
+                  Instead of sending an XOFF character everytime another
+                  character is received, the interrupt routines wait for
+                  'XTxRptInit' characters to be received and then repeat
+                  the XOFF.  If this value is set to low some systems
+                  that allow any character to be an XON will treat the
+                  repeated XOFF character as an XON.
+
+
+
+
+
+
+         async_xoffclr
+         ---------------------------------------------------------------
+
+         Purpose: Manually clears an XOFF received condition
+
+         Format:  void async_xoffclr(port);
+                   ASYNC *port;       Pointer to ASYNC structure
+
+         Example:
+
+                  ASYNC *port;
+
+                  async_xoffclr(port);
+
+         Returns: No return value
+
+         Remarks: Async_xoffclr has the same effect as if the remote
+                  system had sent an XON.  This will unstop the system
+                  in the event a false XOFF is received or the remote's
+                  XON was lost.  Use this function with caution.  Unless
+                  something goes wrong, the remote will clear XOFF cond-
+                  itions automatically by sending an XON.  If an XOFF is
+                  manually cleared, the remote site may be overran and
+                  lose data.  For use only when XON/XOFF flow control
+                  has been activated.
+
+                  See also async_xoffset.
+
+
+
+
+
+
+         async_xoffset
+         ---------------------------------------------------------------
+
+         Purpose: Manually sets an XOFF received condition
+
+         Format:  void async_xoffset(port);
+                   ASYNC *port;       Pointer to ASYNC structure
+
+         Example:
+
+                  ASYNC *port;
+
+                  async_xoffset(port);
+
+         Returns: No return value
+
+         Remarks: Forces the local site to act as though an XOFF had
+                  been received.  Transmit interrupts are disabled until
+                  the remote sends an XON or you call async_xoffclr.
+                  For use only when XON/XOFF flow control has been
+                  activated.
+
+                  See also async_xoffclr.
+
+
+
+
+
+
+         async_xrxd
+         ---------------------------------------------------------------
+
+         Purpose: Check if an XOFF has been received and has activated a
+                  flow control halt.
+
+         Format:  int async_xrxd(port);
+                   ASYNC *port;       Pointer to ASYNC structure
+
+         Example:
+
+                  ASYNC *port;
+                  int rcode;
+
+                  rcode = async_xrxd(port);
+
+         Returns: Not zero if an XOFF has been received and an XON has
+                  not been received to clear it.  Returns zero if XOFF
+                  flow halt is not currently active.
+
+         Remarks: This function is implemented as a macro.  See also
+                  async_xoffclr, async_xtxd.
+
+
+
+
+
+
+         async_xtxd
+         ---------------------------------------------------------------
+
+         Purpose: Check if an XOFF has been sent
+
+         Format:  int async_xtxd(port);
+                   ASYNC *port;       Pointer to ASYNC structure
+
+         Example:
+
+                  ASYNC *port;
+                  int rcode;
+
+                  rcode = async_xtxd(port);
+
+         Returns: Not zero if an XOFF has not been sent by the receive
+                  interrupt routine and an XON has not been sent to
+                  clear it.  Returns zero if an XOFF has not been sent.
+
+         Remarks: This function is implemented as a macro.  See also
+                  async_xoffclr, async_xrxd.
+
+
+
+
+
+
+         async_xuse
+         ---------------------------------------------------------------
+
+         Purpose: Check if XON/XOFF protocol is currently being used
+
+         Format:  int async_xuse(port);
+                   ASYNC *port;       Pointer to ASYNC structure
+
+         Example:
+
+                  ASYNC *port;
+
+                  rcode = async_xuse(port);
+
+         Returns: Not zero if XON/XOFF protocol is being used on either
+                  the transmit or receive sides, zero if XON/XOFF flow
+                  is not being used at all.
+
+         Remarks: This function is implemented as a macro.  See
+                  async_xflow, async_xuset, async_xuser.
+
+
+
+
+
+
+         async_xuser
+         ---------------------------------------------------------------
+
+         Purpose: Check if XON/XOFF protocol is enabled on the receive
+                  side (receiver recognizes XON/XOFF as flow control).
+
+         Format:  int async_xuser(port);
+                   ASYNC *port;       Pointer to ASYNC structure
+
+         Example:
+
+                  ASYNC *port;
+
+                  rcode = async_xuser(port);
+
+         Returns: Not zero if XON/XOFF protocol is being used on the
+                  receive side, zero if it is not.
+
+         Remarks: This function is implemented as a macro.  See
+                  async_xflow, async_xuset, async_xuse.
+
+
+
+
+
+
+         async_xuset
+         ---------------------------------------------------------------
+
+         Purpose: Check if XON/XOFF protocol is enabled on the transmit
+                  side (transmitter sends XOFF/XON as receive buffer
+                  bytes available crosses trip levels).
+
+         Format:  int async_xuset(port);
+                   ASYNC *port;       Pointer to ASYNC structure
+
+         Example:
+
+                  ASYNC *port;
+
+                  rcode = async_xuset(port);
+
+         Returns: Not zero if XON/XOFF protocol is being used on the
+                  transmit side, zero if it is not.
+
+         Remarks: This function is implemented as a macro.  See
+                  async_xflow, async_xuser, async_xuse.
+

@@ -1,0 +1,479 @@
+
+
+
+
+
+                            TXZM -- ZMODEM PROTOCOL DRIVER
+
+                 (c) 1991 Mike Dumdei, 6 Holly Lane, Texarkana Texas
+                         North East Texas DataLink  1:19/128
+                        BBS (903)838-6713, Voice (903)838-8307
+
+              TXZM (Texas Zmodem :) is a zmodem protocol that was developed
+          to demonstrate the speed and capabilities of the MCOMM C serial
+          communications library.  The latest version of TXZM or MCOMM may
+          be obtained from N.E.T. DataLink by either logging in and
+          downloading or by file request of "MCOMM" or "TXZM".  The
+          shareware version of MCOMM contains the TXZM shell in source form
+          and the low level Zmodem driver in library form.  The complete
+          source code comes with the "Libs & Source" registered version of
+          MCOMM.  Libraries for all memory models except for the BCC/TC
+          huge model come with the "Libs Only" registered version of MCOMM. 
+          See the MCOMM order form for specifics on various options.  
+
+                                  TXZM RESTRICTIONS
+
+              TXZM IS NOT PUBLIC DOMAIN however the executable version may
+          be distributed and used free of charge for non-commercial
+          purposes.  If you intend to use TXZM commercially or in a
+          commercial environment and the program will be loaded or operated
+          on more than 3 systems ANYWHERE within the organization, you must
+          obtain a license.  
+
+              The complete TXZM source code is provided as part of the
+          "Libs & Source" registered version of the MCOMM software package. 
+          Linkable libraries are provided with the "Libs Only" registered
+          version of MCOMM.  None of the source code or libraries that are
+          part of the registered version of MCOMM may be distributed,
+          neither may they be incorporated in whole or in part into a
+          competing software product without a written license agreement. 
+          Competing software products are products that are not end user
+          programs themselves, such as "Your Serial Library", and products
+          that directly compete with TXZM (fully developed terminal
+          programs, BBS systems, and similar products are FUNCTIONALLY
+          DIFFERENT than TXZM and NOT considered competing products).  
+
+              The license agreement requirement for commercial use of the
+          EXECUTABLE VERSION ONLY (TXZM.EXE) does not apply to
+          governmental, educational, church, civic, or non-profit
+          organizations.  This does not waive restrictions that apply to
+          the source code for those organizations.
+
+
+
+
+
+
+                         MCOMM ASYNC LIBRARY (Advertisement)
+
+              MCOMM  is a  serial communications  library for  Microsoft C,
+          Turbo C/C++, Borland C/C++, and Zortech C/C++.  It also will work
+          with any other C  compiler or language that supports  Microsoft C
+          calling conventions.  Some of the features of MCOMM are:
+
+               -  Fully interrupt driven
+               -  16550 FIFO mode support
+               -  Baud rates up to 115200 baud
+               -  Supports definitions  for any comm port  that operates on
+                  IRQs 2 through 7 at any address
+               -  Supports simultaneous operation of 2 ports
+               -  Written in  assembler for maximum speed  and minimum code
+                  size
+               -  Advanced  features such  as  block transmit  and receive,
+                  XON/XOFF and  hardware flow control, receive  buffer look
+                  ahead, definable ring buffer sizes and location, ...
+
+              Also  included  with MCOMM  is a  set  of ANSI  capable video
+          functions  that  support  windowed  output,  save/restore  screen
+          functions, timer  functions, and  miscellaneous other code.   The
+          current shareware version of MCOMM is MCOMM551.ZIP.   It includes
+          a  complete small model LIB, TXZM (partial source, rest as libs),
+          and  both a  C and  C++ demo  terminal program.    The registered
+          version  is available as either  "Libs only" or  "Libs & Source".
+          The "Libs Only"  version is  $25 and includes  libraries for  all
+          memory models.  The "Libs & Source" version is $45 and comes with
+          both libraries and all source code.  See the MCOMM order form.
+
+
+
+
+
+
+                                    TXZM OPERATION
+
+              TXZM has 3 modes  of operation.  These are command line send,
+          command  line receive, and terminal  mode.  Running  TXZM with no
+          command line parameters will list available TXZM options.
+
+          Specifying the serial port:
+
+              TXZM directly  supports COM1  through COM4, however  COM3 and
+          COM4   on  older  hardware  may  not  match  what  is  considered
+          standard.  The -c switch (described  below) may be  used for non-
+          standard  configurations of  COM3 and  COM4 or  to force  TXZM to
+          recognize  a custom port.   For standard versions  of COM1-4, use
+          "txzm com#" where '#' is 1-4.
+
+          TXZM switches:
+
+              -u  Start  in terminal mode.   Terminal  mode may  be started
+                  either before  or after  a CONNECT  is made.    It has  a
+                  limited set of functions (dial, upload, download).
+
+              -r  Start in receive mode.  This switch must come last on the
+                  command line  if it is  used.  It  may be followed  by an
+                  optional subdirectory if the files are to downloaded to a
+                  specific  location.    The  -r  switch  may  be  used  in
+                  conjunction  with the  -u  switch to  specify a  download
+                  directory.   When used with the -u switch, TXZM starts in
+                  mini-terminal mode.
+
+              -s  Start up in send mode.   This must be the last  switch on
+                  the command line and be followed by the filename(s) to be
+                  sent. The filename list may contain wild cards.  The send
+                  function  will  recurs  subdirectories  if  the  filename
+                  specifications   are  placed  in  parenthesis.    Placing
+                  filenames  in parenthesis  to recurs  subdirectories also
+                  works in mini-terminal mode.
+
+              -p  Send or accept complete pathnames.  This option, used in 
+                  conjunction with the -r option, will cause TXZM to accept
+                  complete pathname information  in the received  filename.
+                  Without  it, only  the  root name  and  extension of  the
+                  filename  are used.  If the received filename specifies a
+                  directory that does not exist, it will  be created.  If a
+                  download  directory   was  specified  (-r   dlpath),  the
+                  subdirectories will be created under "dlpath".
+
+                  When  used with the -s  switch, the -p  switch will cause
+                  filenames to be sent with complete path information.  Per
+                  zmodem specifications,  only the  path is sent  (no drive
+                  identifiers).  Without the -p switch only the file's root
+                  name  and  extension are  sent.    This  applies even  if
+                  recursing subdirectories.
+
+
+
+
+
+
+              -b####  Specify the CONNECT baud rate.  The CONNECT baud rate
+                  is used to determine estimated file transfer times.  TXZM
+                  currently  will  not  adjust   to  a  CONNECT  rate  when
+                  initially making  the connection.   Unless a  locked baud
+                  rate is used (-l), you must dial using  the baud rate you
+                  will  CONNECT   at.     If  the  connection   is  already
+                  established, and  neither -l  or -b  is given, TXZM  will
+                  open  the  port  using  the baud  rate  it  is  currently
+                  operating at.
+
+              -l####  Set a  locked baud rate.   Use this  option to set  a
+                  fixed computer to modem  baud rate. The -b option  may be
+                  used with the -l  option to specify both the  computer to
+                  modem rate and the modem to line rate.
+
+              -chhh,#   Specify  a non-standard  port configuration.   TXZM
+                  will  work with any port addresfrom 000h to 3f8h and IRQs
+                  2-7.   Replace  'hhh' with  the port  address in  hex and
+                  '#'ith the IRQ to be used.  For example, to use a port at
+                  I/O  address 2E8h that uses IRQ 5, use "txzm -c2E8,5".
+
+              -h  Use hardware  flow control  (RTS/CTS).  This  is required
+                  for modems that use a locked baud rate.
+
+              -i  Ignore absence of carrier detect signal.  Use this switch
+                  when  using  TXZM  to  transfer   files  between  systems
+                  connected   with a null modem cable.  (TXZM only requires
+                  the Rx, Tx, and Gnd wires to be connected).
+
+              -v  Disable serial I/O  during disk writes.   Use this option
+                  if  errors  occur when  the received data  is written  to
+                  disk.   This should only  be necessary when  operating at
+                  high  baud rates with no 16550  UART or the file is being
+                  downloaded to a floppy.   The -v option also  expands the
+                  disk  buffer to 20K bytes  to maintain a  higher level of
+                  efficiency.
+
+
+              -e# Set  duplicate  file   handling  option.     This  option
+                  determines what happens if an attempt is made to download
+                  a file  that already exists.   The following  choices are
+                  available:
+                    -e0  Skip the file -- do not download.
+                    -e1  Resume the transfer at the end of current file.   
+                         This is the default.
+                    -e2  Create a duplicate file name and download the file
+                         as a separate file.
+                    -e3  Overwrite the existing file.
+
+              -w####  Sets the maximum bytes  that may be in transit at any
+                  one time (transmit window size).  This must be a multiple
+                  of 128.
+
+
+
+
+
+
+              -x  Escape all  control characters.   This option  causes the
+                  characters between 00h and  20h, 80h and A0h, 7Fh,  & FFh
+                  to  be  ZDLE escaped.  Zmodem  automatically escapes XON,
+                  XOFF, ZDLE (CAN), DLE, and "<CR>@<CR>" sequences.  The -x
+                  option   is for networks  that do not  pass other control
+                  characters. 
+
+              -x# As an  option, a specific  list of control  characters to
+                  escape may be given.  For example to only ZDLE escape the
+                  ESC character (27 decimal or 1B hex) and ESC+parity  (145
+                  decimal or 9B hex)  and let all other control  characters
+                  pass unaltered, use:  -x27,145.  
+
+              -6  Force use of 16 bit CRC.  The default is 32 bit CRC. This
+                  option does  not show up on  the help screen (ran  out of
+                  room).
+
+              -0  Use  BIOS screen writes.  This only works in command line
+                  mode.  Mini-terminal still does direct writes.
+
+              -q  Run in  DesqView mode.   This option makes  TXZM DesqView
+                  aware meaning it writes to DesqView's video buffer rather
+                  straight  into video  memory.   It  also  causes TXZM  to
+                  release its time slice when it is idle.
+
+          16550 related switches:
+
+              -d  Do   not  enable   16550  FIFO   mode.     Normally  TXZM
+                  automatically enables  FIFO mode.   If  you  are using  a
+                  Western Digital  16550 UART at  lower baud rates  you may
+                  need  to use this option.  The WDC16550 UART doesn't work
+                  in FIFO mode  at low baud rates.  If you have a 16550 and
+                  don't know if  it is  a Western Digital  but get  Garbled
+                  Packet errors  when attempting  to start a  transfer, try
+                  this option.  The National Semiconductor 16550 (NS16550A)
+                  works at all baud rates in FIFO mode.
+
+              -t# Maximum characters to send  to 16550 FIFOs per interrupt.
+                  This may be between 1 and 16.  The default is 8.  A lower
+                  value  may be required for modems that used a locked baud
+                  rate, hardware  flow control,  and have a  small internal
+                  buffer.  8 works fine with USRs.
+
+              -m  Disable modem status register interrupts.  This option is
+                  another patch to accommodate Western Digital's version of
+                  the  16550.  Some WDC16550s  lock up if  the modem status
+                  lines (CTS,  CD, etc.)  are not  connected  to a  driving
+                  signal.   This could happen  if the serial  or null modem
+                  cable being used does not have all signal lines connected
+                  (very possible  with  a  null  modem cable).    Using  -m
+                  prevents this  problem.   It also disables  hardware flow
+                  control and  carrier detect,  however, so if  you require
+                  either of these and have a  WDC16550 you must use a cable
+                  with all appropriate lines connected.
+
+
+
+
+
+
+        Examples:
+
+            txzm -p -s (c:\)   // send all files on drive C -- include
+                               // complete path information
+
+            txzm -p -r         // accept complete pathnames -- if path
+                               // does not exist, create it
+
+            txzm -p -r d:\temp // accept complete pathnames but put files
+                               // and created directories under D:\TEMP
+
+            txzm -r            // receive to current directory, if path
+                               // information is received it is ignored
+
+            txzm -s (\project\*.c) (\project\*.h)  // Sends all .c and .h
+                               // files in the subdir PROJECT and all subs
+                               // under project.  Does not send pathnames.
+
+            txzm -u -r \dnlds  // start in mini-terminal mode, received
+                               // files are placed in "\dnlds" directory
+
+            txzm com2 -u       // mini-terminal mode, use COM2
+
+            txzm -l38400 -b9600 -h -s file1.zip file2.zip
+                               // 38400 baud locked rate, 9600 CONNECT,
+                               // hardware handshake, send file list
+
+            txzm -b2400 -u     // 2400 baud, mini-terminal mode
+
+            txzm -c2e0,7 -r    // custom serial port at 2E0h on IRQ7,
+                               // use current baud rate, receive
+
+            txzm com2 -b115200 i u  // 115200 baud, ignore carrier detect,
+                               // mini-terminal mode
+
+            txzm -e2 -r        // COM1, current baud rate, receive, create
+                               // duplicate name if file exists
+
+            txzm -s @filelist  // send all files listed in "filelist"
+                               // the name "filelist" is an example only
+
+
+            Other than  the -r and -s  switches that must appear  last on the
+        command  line if used, neither case nor switch order are significant.
+        Also you may  use a '/' instead  of a '-' or no  switch identifier at
+        all.  Ex: "txzm i E2 -u /b2400 r" is legal syntax.
+
+
+
+
+
+
+                                    GENERAL NOTES
+
+            TXZM  is faster than any other zmodem  protocol driver I am aware
+        of.  It will run at 95% efficiency in both send  and receive modes at
+        115200 baud on an 8 MHz 286 with a 16550 UART.  This translates to an
+        effective throughput  of 110 Kbps.  In a PC Magazine (Apr 91) article
+        reviewing  various communications software  packages, the BEST zmodem
+        operated at less than 50 Kbps when tested at 115200 baud on the  same
+        type of equipment (8 Mhz 286's with 16550 UARTs).  TXZM is over twice
+        as  fast.    The review  covered  several  well  known shareware  and
+        commercial packages.
+
+            TXZM was also tested on a 4.77 MHz 8088 laptop that contained the
+        functional equivalent of  a 16450 UART (no FIFOs) and  a 4.77 MHz IBM
+        XT  (true blue IBM)  that had 16550  UARTs installed.   On the laptop
+        system TXZM could  send most  efficiently at 23040  baud and  receive
+        most  efficiently at  28800 baud.   The XT,  with 16550  UARTs, could
+        receive  at a  full 38400 baud  but with  the baud rate  set to 38400
+        could only achieve an effective throughput rate of around 35000 baud.
+        The  tests were  performed using  the systems' hard  drives (original
+        slow hard  drives), not a  RAM disk,  which also had  some impact  on
+        speed.   With 16550 UART's,  TXZM could very effectively  work a high
+        speed modem (HST, V.32, or V.32bis) even on a slow 4.77 MHz computer.
+
+            If you compare the  CPS rating stated by TXZM and other programs,
+        you may  find TXZM reporting slightly lower rates.   This is due to a
+        difference  in the  calculation method  TXZM uses  only.   Many other
+        progams  appear to fudge a little bit  on their statistics.  At lower
+        speeds or  on fast CPUs all  Zmodem drivers will run  about the same.
+        The speed difference shows up when the system is under a load such as
+        with extremely high baud rates or  moderately high baud rates on slow
+        CPUs.
+
+
+                                     BBS SUPPORT
+
+            TXZM  now recognizes  the TXZMLOG  environment variable  and will
+        create a log file  with the same format as the one  created by DSZ if
+        DSZLOG is set.  This was added primarily to support BBS software that
+        uses DSZLOG format log files to track downloads, efficiency, etc.  If
+        all you  want is a  log file you  can set TXZMLOG  only.  If  you are
+        using BBS software that looks for a DSZLOG variable, you will have to
+        also set DSZLOG to the same value as TXZMLOG.  Ex:
+
+              set TXZMLOG=C:\BBS\ZMODEM.LOG
+              set DSZLOG=C:\BBS\ZMODEM.LOG
+
+            I did not use DSZLOG to avoid infringing on any non-public domain
+        features of DSZ.  If you want to patch  your personal copy of TXZM to
+        use DSZLOG  directly rather than TXZMLOG, you  can use a utility such
+        as Norton  Utilities or  PC Tools  to  scan TXZM.EXE  for the  string
+        "TXZMLOG" and  change it  to "DSZLOG".  This is  only  patch you  are
+        authorized to  make. DO  NOT under  ANY circumstances  distribute ANY
+        modified version.
+
+
+
+
+
+
+            It is also now possible to specify a file that contains a list of
+        the files to  be sent.  This is  also primarily for BBS support.   To
+        use this option precede the file containing the list of files with an
+        '@'  sign.   The  files  may be  separated  by  any valid  whitespace
+        characters including spaces, tabs, carriage returns, line feeds, etc.
+
+            The -q option has been added as of version 2.10 for BBS operators
+        who run under DesqView.  It causes TXZM to not mess up the  video and
+        also to release CPU time when it is waiting for characters or for the
+        transmit buffer to empty.  
+
+            The -0 option will disable direct screen writes if you are  using
+        command line send or command line receive options.  All screen writes
+        will  be done  through BIOS  calls.   Mini-terminal mode  does direct
+        writes even with the -0 option specified.  -0  does not appear on the
+        help screen.
+
+            BBS sysops  may also use TXZM free (even if you charge for access
+        to your system).
+
+                                   REVISION HISTORY
+
+          2.14  Minor  changes so  code will  compile without  warnings using
+                BC++ 3.0  and  so that  TXZM  would automatically  trigger  a
+                Qmodem download  (Qmodem requires  an "rz\r"  as well as  the
+                INIT  packet -- most programs trip on the INIT packet alone).
+                Also modified the -n (BBS support option) so that it took the
+                name of a Maximus or Opus style LASTUSER.BBS filename  rather
+                than a  node number.   Modified FIFO usage  so that TXZM  set
+                FIFO buffers to 1 in terminal  mode and 8 when sending  files
+                (corrects jerky display at low baud rates).
+
+          2.10  Changed  name  to TXZM  from  ZMP.    The ZMPLOG  envrionment
+                variable is now  TXZMLOG. Found out somebody else already had
+                a ZMP in CP/M days.  Added DesqView aware option.  Fixed Dial
+                Command  so that  it  looked at  the  connect baud  rate  and
+                adjusted accordingly.   Fixed Redial  Command to  continually
+                dial until a  connect was made or ESC pressed.   Added F1 for
+                help  key.   Added  ALT-P so  the  modem parameters  could be
+                changed manually, ALT-C so  the screen could be  cleared, and
+                ALT-= for Doorway mode operation.
+
+          2.00  First non-beta version.  Added a capture file.  Fixed a minor
+                problem with the -0 option.
+
+
+
+
+
+
+
+          1.21  Added support for  specifying files  to send in  a file  that
+                contains a list of  the filenames.  Added -0  option (disable
+                direct screen writes in command mode).
+
+          1.20  Fixed  bug introduced in version 1.19 that caused a divide by
+                zero error  if the total bytes  to be sent was  between 1 and
+                18.  Added ZMPLOG environment variable.
+
+          1.19  Corrected bugs in the -w and -x  options.  Fixed problem with
+                negative  CPS rates  showing up  when more than  11 megabytes
+                were sent.  Added the -6 switch.
+
+          1.17  Fixed double backslash in pathnames when downloading while in
+                the root directory (couldn't DL to root).
+
+          1.16  Added support for send and  receive of complete pathnames and
+                creation of  subdirectories.    This  allows  duplication  of
+                entire drives or subdirectories through the serial port.
+
+          1.10  16 bit CRC mode  now really does work.  TXZM102  was supposed
+                to have fixed it but didn't.
+
+          1.02  Fixed bug  in 16 bit CRC mode (I thought).  Fixed minor error
+                in ZRPOS handler. The sender now sends a ZCRCW packet when an
+                error occurs  rather than a  ZCRCG. This conforms  with Chuck
+                Forsberg's Zmodem specification.
+
+          1.01  Fixed  bug in  ZRPOS handler.   This bug  occasionally caused
+                TXZM  to  trash the  screen  and  lock up  when  a ZRPOS  was
+                received.
+
+                Optimized the code.  TXZM will now operate at  115200 baud at
+                95% efficiency on an 8MHz 286 (approx 11100 cps -- 2 meg in 3
+                mins).  A  16550  UART  is  required  to  obtain  high  speed
+                operation.
+
+                In mini-term mode, PGDN not puts TXZM in receive mode in case
+                the sender's ZRQINIT was missed.  Previously it relied on the
+                incoming  ZRQINIT  to trigger  receive  mode.   It  now works
+                either way.
+
+                Added a '-v'  switch.  This  switch disables overlaying  disk
+                and  serial I/O.  It also  expands the receive file buffer to
+                20K bytes.  The result is 20K of data is received, serial I/O
+                pauses,  the 20K is written to disk,  a ZACK is sent, and the
+                sender resumes sending.
+
+          1.00  Original version.
+

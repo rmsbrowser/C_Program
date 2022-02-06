@@ -1,0 +1,881 @@
+
+
+
+
+
+         ===============================================================
+
+                          MCOMM SUPPLEMENTAL FUNCTIONS
+                  Mike Dumdei, 6 Holly Lane, Texarkana TX 75503
+
+         ===============================================================
+
+         The functions described in this document are non-async related
+         functions provided as part of the MCOMM library.  MCOMM is
+         first and foremost a serial I/O library, therefore, much more
+         effort went into describing the use of the async functions than
+         you will find here.  Also, because MCOMM is a serial library,
+         most of the supplemental functions are targeted towards commun-
+         ications programs.  The video functions correctly handle all
+         ANSI sequences commonly used by BBS systems.  They also support
+         windowed output, allowing you to limit the area of the screen
+         that will be written to.  For example, you can reserve the
+         bottom line of the screen for a status line and no writes, ANSI
+         clear screen commands, etc., will be allowed to overwrite or
+         erase it.
+
+            ANSI sequences supported are:
+               CUP - cursor position
+               HVP - horizontal, vertical position
+               CUU - cursor up
+               CUD - cursor down
+               CUF - cursor forward
+               CUB - cursor backward
+               SCP - save cursor position
+               RCP - restore cursor position
+               ED  - erase display
+               EL  - erase line
+               SGR - set graphics rendition (colors)
+               FF  - form feed, not really ANSI, clears the screen
+
+         Tabs, newlines, carriage returns, line feeds, backspace, the
+         bell character, etc. are supported also.  See the 'Global Video
+         Variables' section for information on options available for
+         handling control characters, scrolling, etc.
+
+         In addition to the video routines, there are also timeout
+         functions, crc functions, string functions, a carrier watchdog
+         function, and several others.  On the following pages, the
+         video functions are listed first followed by the non-video type
+         functions.
+
+         Distribution policy:
+            These functions are part of the MCOMM async library and may
+         not be distributed without the remaining MCOMM files.  No part
+         of the registered version may be distributed or used except as
+         stated in the license agreement.
+
+
+
+
+
+
+         GLOBAL VIDEO VARIABLES:
+
+         v_seg - segment  address of video RAM, set by initvid()
+         v_mode - current video mode, set by initvid()
+         v_page - current video page, set by initvid()
+         v_color - attribute to use when displaying chars, this variable
+            is set directly by ANSI sequences that change the displayed
+            attribute and can be set from your C program to change the
+            current attribute (def = 7)
+         v_snow - snow flag, if 1 chars are written to screen during
+            vertical retrace, if 0 chars are written without waiting for
+            retrace
+         v_cga - a CGA video system was detected
+         v_bios - BIOS video flag, if 1 screen writes are performed
+            using BIOS INT 10, if 0 screen writes are done directly to
+            video RAM
+         v_wndsz - current window borders, set by SETWND macro
+            (def = 0,0,24,79)
+         v_btmrgt, v_rgt, v_btm, v_toplft, v_lft, v_top -
+            v_wndsz individual components
+         vs_wndsz - limits for d_msgat(), d_nchat(), & d_atrbat()
+         vs_btmrgt, vs_toplft  - vs_wndsz individual components
+         v_scrlm - scroll mode, if 1 then the window is scrolled when
+            the cursor would move off the bottom, if 0 the cursor wraps
+            back to the top  (def = 1)
+         v_cntrlm - control char handling, if 1 then control chars per-
+            form control functions, if 0 control chars are displayed as
+            graphic characters (def = 1)
+         v_textm - text mode, if 1 newlines are translated to CR/LF
+            pairs, if 0 newlines are displayed as LFs (def=1)
+         v_ansi - ansi mode, if 1 ANSI sequences are recognized, if 0
+            ANSI sequences are not recognized (def = 1)
+         v_wrel - if 1 cursor location arguments for functions that are
+            limited to the current window are relative to the top left
+            of the current window, if 0 cursor locations are absolute
+            (def = 0)
+         vs_wrel - if 1 cursor location arguments for functions that are
+            NOT limited to the current window are relative to the top
+            left of the current window, if 0 cursor locations are
+            absolute (def = 0)
+         v_ansiseq - shows that an ANSI sequence is currently in process
+            -- an ESC has been received by the display functions but the
+            terminating alpha character has not yet been received. (EX:
+            \33[0;36m is an ANSI sequence.  'v_ansiseq' is set to some
+            positive value when the ESC character is received and stay
+            positive until the sequence terminator is received.  When
+            the terminator is received, 'v_ansiseq' is set to a negative
+            value.  If the next character displayed after the terminator
+            is not the start of another ANSI sequence, 'v_ansiseq' is
+            reset to 0 after displaying that character.  This variable
+            is useful when stripping ANSI sequences from an incoming
+            stream of characters or when it is necessary to interrupt an
+            inprocess ANSI sequence.
+         v_bksp - if 1, backspace is destructive, if 0 backspace is not
+            destructive (def = 1)
+
+
+
+
+
+
+
+         HANDLING OF UNSUPPORTED ANSI SEQUENCES:
+
+         When an unsupported ANSI sequence is displayed, the ESC
+         character (a small back arrow), will be displayed followed by
+         the unrecognized terminating character.  The characters between
+         the ESC and unrecognized terminator are not displayed.
+
+
+         INTERRUPTING INPROCESS ANSI SEQUENCES:
+
+         This section suggests some possible methods for handling the
+         situation where an ANSI sequence is in progress and it is nec-
+         essary to display characters that are not part of the sequence
+         and then resume the sequence.  An example of where this situa-
+         tion is a terminal program that is displaying incoming data
+         containing ANSI codes and the user of the program presses a key
+         that requires screen output in the middle of one of those
+         codes:
+                Incoming data:    ESC[0;  (beginning of ANSI code)
+                User keypress:     F1     (user wants a help screen)
+                More incoming:    36m     (completion of ANSI code)
+
+         The ANSI handler in the video library sees this:
+                  ESC[0;+----------------+
+                        |  Help Screen   |
+                        +----------------+36m
+         and since it doesn't know what to to with an ANSI code that
+         looks like that you see a small back arrow (for unrecognized
+         ANSI code), the help screen, and a 36m.
+
+         To avoid this problem, you can do one of three things.  The
+         first is you can ignore the local user input until the
+         inprocess ANSI sequence is completed.  The v_ansiseq variable
+         described previously can be used to test whether or not an ANSI
+         sequence is currently in process.  Example:
+            if (KBHIT()) {
+               while (v_ansiseq && ((ch = rx_timeout(1)) != TIMED_OUT))
+                  d_ch(ch);
+               proc_keypress();
+            }
+
+         The second method is to use the 'd_msgat' function to display
+         local strings.  It automatically save the ANSI sequence status,
+         and the present cursor position before displaying the passed
+         string.  On exit, the current status of any inprocess ANSI
+         sequences and the cursor position are restored.  It will also
+         place strings outside the current window making it the best
+         function for updating the terminal status line and displaying
+         local screens and messages.
+
+         The last option is to manually preserve the v_ansiseq variable,
+         display local messages, and then manually restore v_ansiseq:
+            temp = v_ansiseq, v_ansiseq = 0;
+            displayhelp();
+            v_ansiseq = temp;
+
+
+
+
+
+
+         VIDEO MACROS:
+
+         ---------------------------------------------------------------
+         SETWND(top, left, btm, rgt)  -- Set Window Dimensions
+         ---------------------------------------------------------------
+         This macro is used to set the global variable that defines the
+         screen area that will be affected by the majority of the video
+         functions.  Initially set to 0,0,24,79.
+
+
+         ---------------------------------------------------------------
+         SETTOPLFT(top, lft), SETBTMRGT(btm, rgt)
+         ---------------------------------------------------------------
+         Same as above but only sets one corner.
+
+
+         ---------------------------------------------------------------
+         SETsWND(top, left, btm, rgt) -- Set Screen Dimensions
+         ---------------------------------------------------------------
+         Sets the screen limits for the functions that are allowed to
+         write outside the current window.
+
+
+         ---------------------------------------------------------------
+         SETsTOPLFT(top, lft), SETsBTMRGT(btm, rgt)
+         ---------------------------------------------------------------
+         Same as SETsWND but for one corner only.
+
+
+         ---------------------------------------------------------------
+         SCRBUF(rows, cols)
+         ---------------------------------------------------------------
+         Returns a value that is the required buffer size for the
+         pu_scrnd and fpu_scrnd functions.  It is used like this:
+
+           sbuf = malloc(SCRBUF(25,80));
+           if (sbuf != NULL)
+              pu_scrnd(0, 0, 25, 80);
+
+
+         ---------------------------------------------------------------
+         d_strnat(row,col,char,attrib,count)
+         ---------------------------------------------------------------
+         Macro for compatibility with older versions of ANSIDRV.
+
+
+
+
+
+
+         VIDEO FUNCTIONS:
+
+         ---------------------------------------------------------------
+         initvid -- Initializes Video Variables
+         ---------------------------------------------------------------
+            int initvid(void);
+
+         Initializes the global video variables, v_seg, v_mode, v_page,
+         and v_snow.  You MUST call this function before using any of
+         the other video functions.  Calling 'initvid' does not
+         automatically cause the linker to pull in the code for the
+         remaining ANSI video routines.  Initvid only includes the
+         global variables and enough code to initialize those variables.
+
+
+         ---------------------------------------------------------------
+         loc -- Locate the Cursor
+         ---------------------------------------------------------------
+            void loc(int row, int col);
+
+         Locates the cursor at row, col.  The top left of the screen is
+         0,0.  If an attempt is made to locate the cursor outside the
+         current window the cursor is placed on the window edge closest
+         to the passed location.  Setting the global variable 'v_wrel'
+         to a non-zero value will make location 0,0 be the top, left
+         corner of the current window.
+
+
+         ---------------------------------------------------------------
+         d_strat -- Display String At Specified Location
+         ---------------------------------------------------------------
+            void d_strat(int row, int col, char *string);
+
+         This function displays a string at row, col.  The attribute
+         used is the current value of the global variable 'v_color'.
+         The area where the string can be displayed is limited to the
+         current window (set by SETWND).
+
+
+         ---------------------------------------------------------------
+         d_str  -- Display String At Current Location
+         ---------------------------------------------------------------
+            void d_str(char *string);
+
+         Displays a string at the current cursor position using v_color
+         for the attribute.
+
+
+         ---------------------------------------------------------------
+         d_chat -- Display Char At Specified Location
+         ---------------------------------------------------------------
+            void d_chat(int row, int col, char ch);
+
+         Displays one character at the specified position using v_color
+         for the attribute.
+
+
+
+
+
+
+         ---------------------------------------------------------------
+         d_ch -- Display Char at Current Location
+         ---------------------------------------------------------------
+            void d_ch(char ch);
+
+         Display one character at the present cursor position using
+         v_color for the attribute.
+
+
+         ---------------------------------------------------------------
+         d_msgat -- Display Message At Location
+         ---------------------------------------------------------------
+            void d_msgat(int row, int col, int atrib, char *str);
+
+         Displays string at the specified location using the specified
+         attribute.  This routine is not limited to writing within the
+         current window.  It is limited by the variable set by the
+         SETsWND macro (s stands for screen).  The routine does not move
+         the cursor and does not break up in process ANSI sequences.
+         Used to display strings outside the current window.
+
+
+         ---------------------------------------------------------------
+         d_msgatd -- Display Message At Location Direct Write
+         ---------------------------------------------------------------
+            void d_msgatd(int row, int col, int atrib, char *str);
+
+         This routine writes 'str' at the specified location using the
+         given attribute.  Unlike the previous function, this function
+         does not support ANSI or control characters.  It is for
+         displaying strings on the screen in the fastest possible
+         manner.  The 'v_bios' variable described in the list of global
+         variables does not apply to this function.  It always uses
+         direct screen writes.
+
+
+         ---------------------------------------------------------------
+         d_atrbat -- Display Attribute At Location With Count
+         ---------------------------------------------------------------
+            void d_atrbat(int row, int col, int atrb, int count);
+
+         Resets the displayed attribute at the specified location to the
+         given attribute for the given number of locations.  This rout-
+         ine performs like d_msgat() in regard to window limitations,
+         cursor movement, and ANSI sequences.
+
+
+
+
+
+
+         ---------------------------------------------------------------
+         d_nchat -- Display Char At Location With Count
+         ---------------------------------------------------------------
+            void d_nchat(char row, char col, char ch, char atrb,
+             int nbr, char dir);
+
+         Displays 'ch', 'nbr' times, using 'atrb' for the attribute, at
+         'row, col'.  If 'dir' is 0 the chars are displayed vertically
+         otherwise they are displayed horizontally.  This routine
+         performs like d_msgat in regard to window limitations, cursor
+         movement, and ANSI sequences.
+
+
+         ---------------------------------------------------------------
+         pu_scrnd -- Move Specified Screen Region To A Buffer
+         ---------------------------------------------------------------
+            void pu_scrnd(int row, int col, int nrows, int ncols,
+             char *buf);
+
+         This function saves a section of the video display beginning at
+         'row', 'col', that is 'nrows' high and 'ncols' wide.  It also
+         saves the current cursor position and shape.  The buffer to
+         hold the screen information must be (2 * nrows * ncols) + 16
+         bytes in size.  The 'v_bios' variable does not apply to this
+         function.  It operates in direct write mode only.
+
+
+         ---------------------------------------------------------------
+         po_scrnd -- Restore a Screen Saved by 'pu_scrnd' Function
+         ---------------------------------------------------------------
+            void po_scrnd(char *buf);
+
+         Restores the screen and cursor information that was placed in
+         'buf' by a previous pu_scrnd call.  The 'v_bios' function does
+         not apply to this function.
+
+
+         ---------------------------------------------------------------
+         fpu_scrnd -- Move Specified Screen Region To A FAR Buffer
+         ---------------------------------------------------------------
+            void fpu_scrnd(int row, int col, int nrows, int ncols,
+             char _far *buf);
+
+         Same as pu_scrnd except moves screen information to a FAR
+         buffer.
+
+         ---------------------------------------------------------------
+         fpo_scrnd -- Restore a Screen Saved by 'fpu_scrnd' Function
+         ---------------------------------------------------------------
+            void fpo_scrnd(char _far *buf);
+
+         Same as po_scrnd except restores data pushed by 'fpo_scrnd'.
+
+
+
+
+
+
+         ---------------------------------------------------------------
+         pushscrn -- Move Specified Screen Region To A Buffer      ( C )
+         ---------------------------------------------------------------
+            int pushscrn(int row, int col, int nrows, int ncols);
+
+         C function that utilizes pu_scrnd and malloc to build a last in
+         first out stack of up to 10 screens.  Performs the same as
+         pu_scrnd except automatically allocates the buffer space.
+         C source code is included for this function.  Returns 0 if
+         successful, non-zero if an attempt is made to push too many
+         screens or the call to malloc space for the screen data fails.
+
+
+         ---------------------------------------------------------------
+         popscrn -- Restore Last Screen Saved by 'pushscrn'        ( C )
+         ---------------------------------------------------------------
+            int popscrn(void);
+
+         Restores last screen pushed by pushscrn function.  Returns 0 if
+         successful or non-zero if an attempt is made to pop a screen
+         when no more screens remain in the screen stack.
+
+
+         ---------------------------------------------------------------
+         fpushscrn -- Move Specified Screen Region To FAR Buffer   ( C )
+         ---------------------------------------------------------------
+            int fpushscrn(int row, int col, int nrows, int ncols);
+
+         Same as pushscrn except the screen buffers are allocated from
+         far memory using your compiler's version of a far malloc
+         function.  (MSC _fmalloc, Turbo C = farmalloc).  Source code is
+         included if you are using a compiler that has a different name
+         for the function to do this.
+
+
+         ---------------------------------------------------------------
+         fpopscrn -- Restore Last Screen Saved by 'fpushscrn'      ( C )
+         ---------------------------------------------------------------
+            int fpopscrn(void);
+
+         Same as popscrn except restores last screen pushed by
+         fpushscrn.
+
+
+
+
+
+
+         ---------------------------------------------------------------
+         moveblk -- Move Screen To Buffer / Buffer To Screen
+         ---------------------------------------------------------------
+            void moveblk(int row, int col, int nrows, int ncols,
+             char *buf, int dirflag);
+
+         This function does the same thing as pu_scrnd and po_scrnd
+         combined except it does not save data on the cursor position or
+         shape and all args are needed when both saving and restoring.
+         The 'dirflag' determines which direction the data is to be
+         moved.  If it is NZ, data is transferred from the screen to the
+         buffer.  If it is zero, then buffer data is transferred to the
+         screen.  The additional 16 bytes of buffer space required by
+         pu_scrnd are not required for this function since it does not
+         build the header for the screen region and cursor data.
+
+
+         ---------------------------------------------------------------
+         rd_scrn -- Read Attrib/Char At Cursor Position
+         ---------------------------------------------------------------
+            int rd_scrn(void);
+
+         Reads the attribute and character at the current cursor pos-
+         ition.  The attribute is returned in the upper 8 bits of the
+         return value and the character in the lower 8 bits.
+
+
+         ---------------------------------------------------------------
+         rd_scrnd -- Read Screen String From Specified Location
+         ---------------------------------------------------------------
+            char *rd_scrnd(int row, int col, int nbytes, char *buf);
+
+         Reads a string that is a maximum of 'nbytes' long beginning at
+         the specified location.  The string is stored in 'buf' and
+         trailing spaces are trimmed.  The 'v_bios' variable does not
+         apply to this function.  The return value is a pointer to
+         'buf'.
+
+         ---------------------------------------------------------------
+         cls -- Clear Currently Defined Window
+         ---------------------------------------------------------------
+            void  cls(void);
+
+         Clears the current window using v_color for the attribute.  Re-
+         turns nothing.
+
+
+         ---------------------------------------------------------------
+         scrlup -- Scroll Window Up
+         ---------------------------------------------------------------
+            void scrlup(int nbrlines);
+
+         Scrolls the current window up the specified number of lines.
+         The attribute used for blank lines is 'v_color'.
+
+
+
+
+
+
+         ---------------------------------------------------------------
+         scrldn -- Scroll Window Down
+         ---------------------------------------------------------------
+            void scrldn(int nbrlines);
+         Same as previous function except scrolls down.
+
+
+         ---------------------------------------------------------------
+         scrlupat -- Scroll Specified Area Up
+         ---------------------------------------------------------------
+            void scrlup(int top, int lft, int btm, int rgt, int nlines);
+
+         Same as previous scrlup function except instead of using the
+         current window, it scrolls the specified area.
+
+
+         ---------------------------------------------------------------
+         scrldnat -- Scroll Specified Area Down
+         ---------------------------------------------------------------
+            void scrldn(int nbrlines);
+         Same as previous scrldn function except instead of using the
+         current window, it scrolls the specified area.
+
+
+         ---------------------------------------------------------------
+         setcurloc -- Set Cursor Location
+         ---------------------------------------------------------------
+            void setcurloc(int location);
+
+         Similar to loc(), but this function passes the row and column
+         one variable with the upper 8 bits being the row and the lower
+         8 bits the column.  This function is used in conjunction with
+         getcurloc() to save and restore the cursor position.
+
+
+         ---------------------------------------------------------------
+         getcurloc -- Get Cursor Location
+         ---------------------------------------------------------------
+            int getcurloc(void);
+
+         Returns the cursor location as an integer.  The upper 8 bits is
+         the row, and the lower 8 bits is the column.
+
+
+         ---------------------------------------------------------------
+         setcursiz -- Set Cursor Size
+         ---------------------------------------------------------------
+            void setcursiz(int);
+
+         Sets the starting and ending scan lines for the cursor. The
+         upper 8 bits are the starting scan line and the lower 8 bits
+         are the ending scan line.
+
+
+
+
+
+
+         ---------------------------------------------------------------
+         getcursiz -- Get Cursor Size
+         ---------------------------------------------------------------
+            int getcursiz(void);
+
+         Returns the current starting and ending scan lines of the cur-
+         sor.  The high bits are the starting scan line and the lower 8
+         bits are the ending scan line.
+
+
+         ---------------------------------------------------------------
+         setvmode -- Set Video Mode
+         ---------------------------------------------------------------
+            void setvmode(int mode);
+
+         Sets the video mode to 'mode'.  The only modes that these func-
+         tions will work in, however, are the 80 x 25 text modes.
+
+
+         ---------------------------------------------------------------
+         getvmode -- Get Video Mode
+         ---------------------------------------------------------------
+            int getvmode(void);
+
+         Returns the current video mode.
+
+
+         ---------------------------------------------------------------
+         setvpage -- Set Video Page
+         ---------------------------------------------------------------
+            void setvpage(int page);
+
+         Sets the video page to 'page'.  Pages are only supported on
+         color systems.  This function also modifies v_seg so that it
+         reflects the new page value set.
+
+
+         ---------------------------------------------------------------
+         getvpage -- Get Video Page
+         ---------------------------------------------------------------
+            int getvpage(void);
+
+         Returns the current video page.
+
+
+         ---------------------------------------------------------------
+         setvbordr -- Set Video Border
+         ---------------------------------------------------------------
+            void setvbordr(int attrib);
+
+         Sets the border color of the screen.
+
+
+
+
+
+
+         MISCELLANEOUS FUNCTIONS:
+
+         ---------------------------------------------------------------
+         str*just -- right, left, or center justify a string.
+         ---------------------------------------------------------------
+         These functions 1st trim all spaces (ASCII 32's) and then just-
+         ify the string in the specified field width using the specified
+         pad character.  The memory area where the string is located
+         must be at least field size + 1 in size.  If the string is
+         longer than the field width, strljust and strcentr truncate the
+         right portion of the string; strrjust will cut off the right
+         side.  Only ASCII 32's are trimmed.
+
+         Returns a pointer to the justified string.
+
+         char *strrjust(char *, int, char);
+         char *strljust(char *, int, char);
+         char *strcentr(char *, int, char);
+
+         str_out = strrjust(str_in, fieldsz, padchar);
+
+
+         ---------------------------------------------------------------
+         str*trim -- trims spaces (ASCII 32's only) from a string.
+         ---------------------------------------------------------------
+         Trims spaces from left, right, or both ends of a string.
+
+         Returns pointer to the passed string.
+
+         char *strrtrim(char *);
+         char *strltrim(char *);
+         char *strtrim(char *);
+
+         str_out = strrtrim(str_in);
+
+
+         ---------------------------------------------------------------
+         strsum -- strcat for multiple strings.
+         ---------------------------------------------------------------
+         Makes one string from multiple strings.  Unlike strcat, the
+         first string in the list is not one of the strings to add but
+         instead is a buffer for the result of adding the rest of the
+         strings in the list.  The args to the function are:
+            the dest, a variable number of char *'s, a NULL ptr
+
+         Returns a pointer to the result string.
+
+         char *strsum(char *, ...);
+
+         str_out = strsum(str_out, str_in1, str_in2, ..., NULL);
+
+
+
+
+
+
+         ---------------------------------------------------------------
+         strpbrkf -- finds 1st char in str1 not in str2.
+         ---------------------------------------------------------------
+         This function looks for the first character in 'str1' that does
+         not belong to the character set contained in 'str2' and returns
+         a pointer to that character.  If 'str1' consists entirely of
+         characters in 'str2', NULL is returned.  Opposite of strpbrk.
+
+         char *strpbrkf(char *, char *);
+         rtnstr = strpbrkf(str1, str2);
+
+
+         ---------------------------------------------------------------
+         strrstr -- find last occurrence of str2 in str1.
+         ---------------------------------------------------------------
+         This function returns a pointer to the last occurrence of
+         'str2' within 'str1'.  If 'str2' is not in 'str1', NULL is
+         returned.  This is identical to the standard 'strstr' function
+         except it works from the end of 'str1' towards the beginning
+         instead of the other way.
+
+         char *strrstr(char *, char *);
+         rtnstr = strrstr(str1, str2);
+
+
+         ---------------------------------------------------------------
+         strcntch -- returns number occurrences of char in string.
+         ---------------------------------------------------------------
+         int strcntchr(char *, char);
+         count = strcntchr(string, srchchar);
+
+
+         ---------------------------------------------------------------
+         calc_crc -- 16 bit CRC routine for block data.
+         ---------------------------------------------------------------
+         Calculates the CRC for a block of data 'count' bytes long.
+         Returns CRC.
+
+         int calc_crc(char *, int);
+         crc = calc_crc(data, nbr_bytes_of_data);
+
+
+         ---------------------------------------------------------------
+         update_crc -- 16 bit CRC for character at a time data.
+         ---------------------------------------------------------------
+         Returns updated CRC.
+
+         int update_crc(int, char);
+         crc = update_crc(crc, char);
+
+
+
+
+
+
+         ---------------------------------------------------------------
+         watchdogset -- Enables/Disables watchdog function  (C function)
+         watchdoghook -- ASM function used by WATCHDOG.C
+         ---------------------------------------------------------------
+         int watchdogset(int flag, int combase)
+
+         To enable:  call with flag = 1
+            combase = base adrs of comm chip (ex: 3F8)
+         To disable: call with flag = 0
+            combase = don't care
+
+         This function monitors Carrier Detect on the selected serial
+         port and does a cold reboot if the carrier is lost.  If you use
+         both this function and the TIMEOUT functions make sure you
+         uninstall the hooks in the reverse order that you installed
+         them and make sure that you uninstall them before you exit your
+         program.  Failing to do this will cause your system to crash
+         (the redirected interrupt vectors are now pointing to freed
+         memory instead of a program).
+
+
+         ---------------------------------------------------------------
+         ctshookset -- Patch to BIOS INT14 to prevent timeouts when
+            using CTS handshaking  (C function)
+         int14ctshook -- ASM function used with CTSHOOKSET
+         ---------------------------------------------------------------
+         int ctshookset(int flag, int portval, int combase)
+         void interrupt far int14ctshook(void);
+
+         To enable:  call with flag = 1
+            portval = COM1 (0) or COM2 (1)
+            combase = base adrs of comm chip (ex: 3F8)
+         To disable: call with flag = 0
+            portval = don't care
+            combase = don't care
+
+         This function sets a hook into the BIOS serial interrupt vector
+         that waits indefinitely for CTS to go high on the specified
+         port when sending data.  All INT14 calls that are not for the
+         specified port and all service requests except for 'send byte'
+         are passed on to the old INT14 vector unaltered.  In other
+         words for the hook to have any effect when INT14 is called:
+            1)  DX has to equal the 'portval' you set here
+            2)  AH has to equal '1' -- the send char service ID
+         The effect it has then is to wait for CTS to be true then exe-
+         cute the old INT14 interrupt.  The purpose of the function is
+         keep high speed modems that CTS handshake from creating timeout
+         errors when redirecting stdout and stderr to the comm port.  Be
+         SURE to uninstall the hook before exiting your program or the
+         redirected interrupt vector will be pointing to free memory
+         instead of an interrupt handler.
+
+
+
+
+
+
+         ---------------------------------------------------------------
+         tickhookset -- Enables/Disables 'ticker' for timer functions
+         ---------------------------------------------------------------
+         int tickhookset(int flag)
+
+         To enable:  call with flag = 1
+         To disable: call with flag = 0
+
+         This function enables the 'tick counter' used by the timeout
+         and tdelay functions by pointing the TIMER interrupt vector,
+         1Ch, to a new interrupt handler that increments the counter
+         approximately 18.2 times per second.  The advantage of using
+         this method over the BIOS function is no coding is needed to
+         account for the possibility of calling your timer functions
+         near midnight.  The 'tick counter' is a long and may be read by
+         calling 'get_ticker'.
+
+         YOU MUST DISABLE 'TICKER' BEFORE EXITING YOUR PROGRAM.
+
+
+         ---------------------------------------------------------------
+         set_timeout     -- initializes a timer
+         set_longtimeout -- initialize a long timer
+         timed_out       -- checks if a timeout has occurred
+         ---------------------------------------------------------------
+         void set_timeout(long *t_out, unsigned ticks);
+
+         int timed_out(long *t_out);
+
+         These functions work in conjunction with each other and require
+         the 'tick counter' to be activated by TICKHOOKSET.  The fol-
+         lowing macros are defined in EXTRA.H:
+            SET_TO_TENTHS(to, tenths)  set_timeout((&to), (tenths)*9/5)
+            SET_TO_SECS(to, secs)      set_timeout((&to), (secs)*18)
+            SET_TO_MINS(to, mins)      set_timeout((&to), (mins)*1080)
+         After setting the timeout value with one of the above macros
+         you then call timed_out() see if a timeout has occurred.  Here
+         is an example:
+
+            long to;
+            int toolong = 0;
+
+            tickhookset(1);                      /* enable hook */
+            SET_TO_SECS(to, 2);       /* set timeout for 2 secs */
+            while (!(toolong = timed_out(&to)))
+            {
+               if (condition_met()) /* wait for cond 2 secs max */
+                  break;
+            }
+            if (toolong)             /* timed out if toolong NZ */
+               return TIMEOUT_ERR;
+
+         Notice that the macro does not require the '&' operator but the
+         call to timed_out() does.  Using these functions, you may have
+         as many timeouts going as you have timeout variables.
+
+
+
+
+
+
+         ---------------------------------------------------------------
+         get_ticker -- get the current value of internal tick counter
+         ---------------------------------------------------------------
+         long get_ticker(void);
+
+         Returns the value of the internal tick counter.  This counter
+         is incremented 18.2 times a second from the time tickhookset(1)
+         is called until tickhookset(0) is called.
+
+
+         ---------------------------------------------------------------
+         tdelay -- kill time function
+         ---------------------------------------------------------------
+         int tdelay(unsigned ticks);
+
+         This functions delays the specified number of ticks and then
+         returns.  Before using this function you must enable the
+         internal tick counter by calling 'tickhookset'.
+
+         The following macros are defined in EXTRA.H:
+            DELAY_TENTHS(tenths)     tdelay(((tenths)*9/5)+1)
+            DELAY_SECS(secs)         tdelay((secs)*18)
+            DELAY_MINS(mins)         tdelay((mins)*1080)
+

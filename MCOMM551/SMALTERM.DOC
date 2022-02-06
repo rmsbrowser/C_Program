@@ -1,0 +1,50 @@
+
+
+
+
+
+         ===============================================================
+
+               SMALTERM.C -- Demo comm program for async routines
+                  Mike Dumdei, 6 Holly Lane, Texarkana TX 75503
+
+         ===============================================================
+
+            Smalterm is a demo program written using the routines in the
+         COMM_S library to demonstrate the library functions.  The C
+         version does not have any file transfer protocols built in,
+         however, the SND.BAT and RCV.BAT files are set up to call
+         Forsberg's DSZ external Zmodem protocol and are executed by
+         pressing PGUP or PGDN.  The C++ version does include XMODEM and
+         XMODEM-1K protocols.
+
+            It contains code for a host mode (host mode only in C
+         version) similar to that found in Procomm, a Shell to DOS
+         function, receive with timeout, hang-up, remote prompt for user
+         input, and some other useful functions.
+
+            To build the program you need to have the header files that
+         come in the archive and the COMM_S.LIB to link with.  If you
+         use Turbo C or Zortech C, you will also need to convert the
+         COMM_S lib to your format by running TCLIBS.BAT or ZTCLIBS.BAT.
+         Once you have the correct LIBs and .H files in your INCLUDE and
+         LIB directories, compile and link:
+
+            (q)cl smalterm.c /link comm_s         ;Microsoft C
+            tcc smalterm.c comm_s.lib             ;Turbo C
+            ztc -b smalterm.c comm_s.lib          ;Zortech C
+
+            tcc smalterm.cpp comm.cpp comm_s.lib  ;Turbo C++
+            ztc smalterm.cpp comm.cpp comm_s.lib  ;Zortech C++
+
+         To run the program:
+
+            smalterm {COM1 | COM2} {parameters Ex: 2400n81}
+
+            SMALTERM is yours to do what you want with but you may not
+         distribute the library source code or the libraries that come
+         with the registered version.
+
+            Mike Dumdei, 6 Holly Lane, Texarakana TX 75503
+            North East Texas DataLink 1:19/128, 903 838-6713
+

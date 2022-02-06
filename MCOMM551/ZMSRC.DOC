@@ -1,0 +1,162 @@
+
+
+
+
+
+                           ZMODEM SOURCE CODE DOCUMENTATION
+
+          Introduction
+
+               The Zmodem source code that makes up TXZM originated as a
+          project to add all the common protocols to the MCOMM Async
+          Library.  Due to other responsibilities, I have had to put the
+          project on hold but have completed enough of it to be useful. 
+          The code is 100% functional and very efficient.  The
+          documentation leaves a lot to be desired -- this is it.  The
+          present code is fairly easy to use in spite of the impression you
+          may get when you look at the TXZM.C source file.  The following
+          documentation in conjunction with the source code will enable you
+          to use the code as long as you know something about what you are
+          doing.  
+
+          Restrictions
+
+               The code and libraries for the SERIAL and VIDEO functions in
+          the registered version of MCOMM may not be distributed in whole
+          or in part.  This includes all the COMM_?.LIB libraries and all
+          source code that pertains to the serial I/O or video functions. 
+          End user programs developed using those libraries, however, may
+          be distributed and are completely royalty free.
+
+               The ZMODEM code that makes up TXZM and is part of the
+          registered version of MCOMM (zmdos.c, zfunc.asm, batch.c, and
+          xyzgen.c) also MAY NOT be distributed, nor any libraries
+          distributed that were created with those source codes other than
+          the small model library that is in the shareware version of
+          MCOMM.  You may use the code in any non-competing software
+          product without royalty.  You may use any of the non-ZMODEM
+          specific functions (ZMODEM specific functions are those contained
+          in zmdos.c and zfunc.asm) that are part of the TXZM demo without
+          royalty for any end user programs developed.  You MAY NOT
+          distribute ANY of the TXZM demo other than as provided in the
+          shareware versions and then only with all accompanying files that
+          make up the shareware product.  Specifically prohibited is use of
+          this ZMODEM source code, in whole or in part, to enhance a
+          competitor's communications library (this includes DOOR libraries
+          and communication libraries developed for other languages or
+          operating systems).  As long as you stick with end user
+          applications that are not specifically and primarily a protocol
+          driver, you are not required to pay any royalties.  Fully
+          developed terminal programs such as Procomm, Telix, Crosstalk,
+          etc. are not primarily protocol drivers and therefore are NOT
+          considered competing products.  Neither are BBS systems, mail
+          doors (not mail door libraries), or similar products considered
+          competing products with TXZM.
+
+
+
+
+
+
+          Disclaimer
+
+               In regard to the MCOMM Async Library, the ZMODEM code that
+          makes up TXZM is provided as a demo -- not as a integral part of
+          the product.  If you can use it, it is there.  If you can't, I
+          will attempt to answer any reasonable questions but due to the
+          complexity of the code, the lack of precise documentation I have
+          been able to develop, and the wide range of skill levels of
+          programmers, I cannot provide unlimited support.  This limited
+          documentation and the TXZM source code is all you get.  It is up
+          to you to figure out what to do with it.  This does not apply to
+          the serial library itself -- only the zmodem code.  
+
+          How it Works 
+
+               TXZM.C is a shell for the real zmodem driver code.  This
+          module does nothing more than provide a means of generating the
+          list of file names to be transferred and handling messages from
+          the low level zmodem code.  It's complex appearance is due to the
+          added functions not normally considered part of zmodem itself
+          such as the ability to create and recurs subdirectories, the
+          terminal mode, shell to DOS, DesqView and DoorWay support, etc. 
+          Another factor in its apparent complexity is the elaborate (at
+          least more elaborate than usual) means of displaying file
+          transfer status combined with an attempt to keep from linking in
+          the floating point system for calculations that really could use
+          floating point math.  
+
+               This implementation of zmodem requires you set some initial
+          flags and variables such as current baud rate, what to do in the
+          event of a file name collision when receiving, etc., and then
+          call either ZSendFile or ZRecvFile.  From then on the low level
+          code takes over.  Your application then must handle (or ignore)
+          messages generated by the low level code.  This messages are
+          directed to a function you must have in your program called ZMsg. 
+          Messages are generated at the end of every file and block, when
+          errors occur, when zmodem headers are sent or received, when a
+          name clash occurs, when the code is setting waiting for
+          characters or the transmit buffer to empty, etc.  The low level
+          code itself puts NOTHING on the screen.  That is the function of
+          ZMsg.  ZMsg also can do special handling in the event of name
+          collisions and during initialization of a file transfer.  When
+          ZMsg is called a number of global variables are available and are
+          used to determine status and display messages.  For specifics,
+          refer to TXZM.C and ZMDOS.H.  (Functions in TXZM.C except 'main'
+          appear in alphabetic order).
+
+               The low level zmodem code was developed using Chuck
+          Forsberg's Zmodem documentation and by referring to his public
+          domain zmodem source code for Unix.  It is not a simple "port" of
+          his code, however.  I used the documentation and the source to
+          extract the logic of what was going on and completely rewrote
+          most of it.  This version has no goto's, is very streamlined and
+          straight forward, uses tables, block I/O, and a little assembler
+
+
+
+
+
+
+          to speed things up, and has several enhancements.  There are both
+          ASM and C versions of three of the key functions.  Both the ASM
+          and C versions are identical functionally.  They are the function
+          to receive a block (ZRecvPacket), the function to send a block
+          (ZTxBlock), and the function to receive a character with zmodem
+          processing (ZRxChar).  To use the C version, define NO_ASM on the
+          command line when compiling ZMDOS.C (this requires you have the
+          source which comes with the registered version of MCOMM).  If you
+          are a C programmer and want to see what the ASM is doing, you can
+          look at the C version in ZMDOS.C.  The C version of the code is
+          only capable of running at around 80000 baud on an 8 MHz 286
+          whereas the assembler version will run at 110000 baud.  The
+          assembler version is what is in the MCOMM shareware demo.
+
+               The TXZM demo will compile with MSC, Borland or Turbo C, and
+          Zortech C.  The 3 assemblerized functions will assemble with
+          either MASM or TASM.  All code can be generated for any memory
+          model, except the ASM will not work with a Borland C or TC HUGE
+          model program.  They do funny stuff with the DS register in their
+          HUGE model and I didn't want to work around it.  To compile the
+          shareware demo:
+
+               Borland or Turbo C
+
+                    tcc
+                    bcc txzm.c zmbcc_s.lib comm_s.lib
+
+               Microsoft C or Quick C
+
+                    qcl
+                    cl txzm.c /link zmmsc_s.lib comm_s.lib
+
+               Zortech C
+
+                    ztc -b zmztc_s.lib comm_s.lib
+
+               If you use either Borland's or Zortech's compilers be sure
+          and run the conversion batch file documented elsewhere in the
+          MCOMM async package to convert the comm_s.lib to work with your
+          compiler.  As distributed, before conversion, comm_s.lib is for
+          MSC or QC.
+

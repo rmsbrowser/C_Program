@@ -1,0 +1,111 @@
+
+
+                            MCOMM ASYNC LIBRARY NOTES
+
+            This file contains information on configuring the libraries
+         for use with your compiler and some Zortech C compiler specific
+         notes.  If your application may be ran on a system that uses a
+         Western Digital 16550, be sure and read the notes on this chip
+         in ASYNC.DOC.  The file, UPDATE.DOC, contains important
+         information regarding changes or additions to the library and
+         header files.  Be sure and read this file also.  The area code
+         for east Texas has been changed from 214 to 903 effective
+         November 1, 1990.  After May 1, 1991, the old area code will no
+         longer work.  The new numbers are:
+
+            North East Texas DataLink 1:19/128  (903) 838-6713
+            Mike Dumdei (voice)                 (903) 838-8307
+
+
+                       LIBRARY AND HEADER FILE INFORMATION
+
+         WHEN UPDATING, ALWAYS UPDATE THE HEADER FILES ALSO !!!
+
+         The composite LIBs listed below contain all the functions des-
+         cribed in ASYNC.DOC and SUPLMNT.DOC.  As supplied on the disk
+         the LIBs are setup for linking using Microsoft C or Quick C.
+         If you use Turbo C you need to run the batch file, TCLIBS.BAT,
+         to convert the LIBs to Turbo C format.  If you use Zortech C,
+         you will need to run ZTCLIBS.BAT.
+
+         The conversion is necessary because a few of the non-async
+         functions are written in C and call library functions that have
+         different names in Microsoft C, Turbo C, and Zortech C.  All
+         the C code used is included in the shareware version so that if
+         you are using a compiler, other than one of the above, that
+         does use Microsoft calling sequences, you can recompile the
+         code, update the composite LIBs, and still use the library.
+
+         In addition, the following statements are contained in COMM.H,
+         ANSIDRV.H, and EXTRA.H:
+
+                         #if !defined(MCOMM)
+                           #define _C_ cdecl
+                           #define _N_ near
+                           #define _F_ far
+                           #define MCOMM
+                         #endif
+
+         These definitions are not totally up to date with MSC 6.0 and
+         QC 2.5 (they have added a leading underscore for ANSI compat-
+         ibility), however, they do still work with these compilers and
+         they also work with Turbo C 2.0, Zortech C, and previous
+         versions of Microsoft's compilers. If you are using a different
+         compiler, you may need to change the 'cdecl', 'near', and 'far'
+         keywords to the equivalent names used by your compiler.
+
+
+
+
+         Only the small model version of the LIBs is included in the
+         shareware version.
+
+         COMPOSITE LIBS:
+            COMM_S.LIB     ;small model LIB of all routines
+            COMM_C.LIB     ;compact model LIB of all routines
+            COMM_M.LIB     ;medium model LIB of all routines
+            COMM_L.LIB     ;large model LIB of all routines
+            COMM_H.LIB     ;created by TCLIBS.BAT (only used by TC)
+
+         CONVERSION LIBS: (used by TCLIBS.BAT, MSCLIBS.BAT, ZTCLIBS.BAT)
+            TC_XS.LIB      ;used to convert COMM_S to TC
+            TC_XC.LIB      ;used to convert COMM_C to TC
+            TC_XM.LIB      ;used to convert COMM_M to TC
+            TC_XL.LIB      ;used to convert COMM_L to TC
+            TC_XH.LIB      ;used to convert COMM_L to TC COMM_H
+            MSC_XS.LIB     ;used to convert COMM_S to MSC
+            MSC_XC.LIB     ;used to convert COMM_C to MSC
+            MSC_XM.LIB     ;used to convert COMM_M to MSC
+            MSC_XL.LIB     ;used to convert COMM_L to MSC
+            ZTC_XS.LIB     ;used to convert COMM_S to ZTC
+            ZTC_XC.LIB     ;used to convert COMM_C to ZTC
+            ZTC_XM.LIB     ;used to convert COMM_M to ZTC
+            ZTC_XL.LIB     ;used to convert COMM_L to ZTC
+
+
+         Zortech C Specific Information:
+
+            The Zortech C IO.H file and MCOMM COMM.H file have a name
+            clash with the defined variable 'R_OK'.  Zortech has it
+            defined as 4 and MCOMM defines it as 0.  The MCOMM
+            documentation makes references to a return value of R_OK so
+            rather than define it out in COMM.H, I left it in.  I
+            thought it was better for you to get a compiler error that
+            you could find than defining out R_OK if __ZTC__ was defined
+            and you not knowing what was wrong when a function that was
+            supposed to return R_OK didn't (since R_OK was 4 instead of
+            0).  The solution is to define it out of COMM.H if __ZTC__
+            is defined and then everywhere an MCOMM function is supposed
+            to return R_OK, look for a return value of 0.
+
+            Control-break locks up the SMALTERM demo programs.  I think
+            the problem is:  Zortech C control-break causes you to exit
+            to DOS where MSC and TC do not as long as only the BIOS key
+            functions are used.  When SMALTERM exits to DOS with the
+            interrupts still hooked, the demo crashes. This only applies
+            to Zortech C/C++.  I tried using the signal functions to fix
+            it but didn't get it.  If you are an experienced Zortech
+            user and want to tell me how to make Zortech C run the exit
+            term function when control-break is pressed before it exits
+            to DOS, I will correct it for the next version.
+
