@@ -1,0 +1,45 @@
+# makefile DOS BCC for simple NET Client for mars_nwe.
+# /****************************************************************
+#  * (C)opyright (C) 1993,1996  Martin Stover, Marburg, Germany   *
+# ****************************************************************/
+
+O = .obj
+E = .exe
+A = .lib
+S = .asm
+C = .c
+
+INCLUDE=D:\BC45\INCLUDE
+LIB=D:\BC45\LIB
+CC=bcc -ml -Dmsdos -I$(INCLUDE)
+LD=bcc -ml -L$(LIB)
+ASFLAGS= -la -mx
+AS = tasm
+AR = tlib
+RM = del
+
+ASMODS=  kern$(O)
+CCMODS=  tools$(O) netcall$(O) ncpcall$(O) \
+         login$(O) map$(O) slist$(O) nwcrypt$(O) \
+         nwdebug$(O) nwtests$(O) capture$(O)
+
+all:      net$(E)  d
+d:        demoprn$(E)
+
+net$(E):  net$(O) $(ASMODS) $(CCMODS)
+          $(LD) net$(O) @&&|
+$(ASMODS)
+$(CCMODS)
+|
+
+demoprn$(E):  demoprn$(O)
+          $(LD) demoprn$(O) @&&|
+|
+
+$(C)$(O):
+       $(CC)  -c $*$(C)
+
+$(S)$(O):
+       $(AS) $(ASFLAGS) $*$(S)
+
+

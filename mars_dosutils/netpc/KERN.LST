@@ -1,0 +1,317 @@
+Turbo Assembler	 Version 4.1	    09/02/22 15:19:49	    Page 1
+kern.asm
+
+
+
+      1				     ; kern.asm: 20-Nov-93, 21:52
+      2				     IDEAL
+      3				     P286
+      4	0000			     MODEL LARGE
+      5				     ; Fuer Turboc gerettet werden muessen folgende Register:
+      6				     ; BP, SS, SP, DS, CS u. SI, DI
+      7
+      8				     MACRO P_START
+      9					push	bp
+     10					mov	bp, sp
+     11				     ENDM
+     12
+     13				     MACRO P_END
+     14					pop	bp
+     15				     ENDM
+     16
+     17				     MACRO PUSH_REGS
+     18					push	ds
+     19					push	si
+     20					push	di
+     21				     ENDM
+     22
+     23				     MACRO POP_REGS
+     24					pop	di
+     25					pop	si
+     26					pop	ds
+     27				     ENDM
+     28
+     29				     ;;	EXTRN	_esr_routine:FAR
+     30
+     31				     PUBLIC  _IPXinit;
+     32				     PUBLIC  _IPXopen_socket;
+     33				     PUBLIC  _IPXclose_socket;
+     34				     PUBLIC  _IPXlisten;
+     35				     ;;	PUBLIC	_asm_esr_routine;
+     36				     PUBLIC  _xmemmove;
+     37				     PUBLIC  _Net_Call;
+     38
+     39	0000			     DATASEG
+     40	0000  0000FFFE		     enterIPX  DD FAR
+     41
+     42	0004			     CODESEG
+     43	0000			     PROC _IPXinit;
+     44					P_START
+1    45	0000  55			push	bp
+1    46	0001  8B EC			mov	bp, sp
+     47					PUSH_REGS
+1    48	0003  1E			push	ds
+1    49	0004  56			push	si
+1    50	0005  57			push	di
+     51	0006  B8 7A00			mov	ax,  7A00h
+     52	0009  CD 2F			int	2Fh
+     53	000B  3C FF			cmp	al,  0FFh
+     54	000D  75 10			jne	@@fertig
+     55	000F  B9 0000s			mov	cx, @data
+     56	0012  8E D9			mov	ds, cx
+     57	0014  89 3E 0000r		mov	[WORD PTR enterIPX],   di
+Turbo Assembler	 Version 4.1	    09/02/22 15:19:49	    Page 2
+kern.asm
+
+
+
+     58	0018  8C C0			mov	ax, es
+     59	001A  A3 0002r			mov	[WORD PTR enterIPX+2], ax
+     60	001D  B0 01			mov	al, 1 ;	OK
+     61	001F			     @@fertig:
+     62	001F  B4 00			mov    ah, 0
+     63					POP_REGS
+1    64	0021  5F			pop	di
+1    65	0022  5E			pop	si
+1    66	0023  1F			pop	ds
+     67					P_END
+1    68	0024  5D			pop	bp
+     69	0025  CB			ret	    ;  OK = 1 ;	nicht ok = 0
+     70	0026			     ENDP
+     71
+     72	0026			     PROC  _xmemmove;
+     73					   ARG	   z:DATAPTR, q:DATAPTR, nmbr:WORD; Argumente
+     74	0026  FA			   cli		   ; Disable Interrupts
+     75	0027  55			   push	   bp
+     76	0028  8B EC			   mov	   bp,sp
+     77	002A  8B 4E 0E			   mov	   cx, [nmbr];
+     78	002D  0B C9			   or	   cx, cx;
+     79	002F  74 1F			   jz	   @@fertig; Anzahl ist	0;
+     80	0031  1E			   push	   ds;
+     81	0032  56			   push	   si;
+     82	0033  57			   push	   di;
+     83	0034  9C			   pushf
+     84	0035  C5 76 0A			   lds	   si, [q] ; Quelle
+     85	0038  C4 7E 06			   les	   di, [z] ; Ziel
+     86	003B  3B FE			   cmp	   di, si  ;
+     87	003D  7C 0A			   jl	   @@L1	   ; Ziel ist kleiner
+     88	003F  FD			   std		   ; Richtungsflag setzen
+     89	0040  49			   dec	   cx
+     90	0041  03 F9			   add	   di, cx  ; Von oben nach unten kopieren
+     91	0043  03 F1			   add	   si, cx  ;
+     92	0045  41			   inc	   cx	   ; alten Wert	wiederherstellen
+     93	0046  EB 02 90			   jmp	   @@L2;
+     94	0049				   @@L1:
+     95	0049  FC			   cld		   ; Richtungsflag loeschen
+     96	004A				   @@L2:	   ; und nun das eigentliche kopieren
+     97	004A  F3> A4			   REP	   movsb   ;
+     98	004C  9D			   popf
+     99	004D  5F			   pop	   di;
+    100	004E  5E			   pop	   si;
+    101	004F  1F			   pop	   ds;
+    102	0050				   @@fertig:
+    103	0050  5D			   pop	   bp;
+    104	0051  FB			   sti		   ; enable Interrupts
+    105	0052  CB			   ret
+    106	0053			     ENDP
+    107
+    108	0053			     PROC  _IPXopen_socket;
+    109					   ARG	sock:WORD, live:WORD
+    110					   P_START
+1   111	0053  55			push	bp
+1   112	0054  8B EC			mov	bp, sp
+    113					   PUSH_REGS
+1   114	0056  1E			push	ds
+Turbo Assembler	 Version 4.1	    09/02/22 15:19:49	    Page 3
+kern.asm
+
+
+
+1   115	0057  56			push	si
+1   116	0058  57			push	di
+    117	0059  8B 46 08			   mov	   ax, [live]
+    118	005C  8B 56 06			   mov	   dx, [sock]
+    119	005F  BB 0000s			   mov	   bx, @data
+    120	0062  8E DB			   mov	   ds, bx
+    121	0064  BB 0000			   mov	   bx, 0
+    122	0067  FF 1E 0000r		   call	   [enterIPX]
+    123	006B  3C FF			   cmp	   al,	0FFh
+    124	006D  75 06			   jne	   @@L1
+    125	006F  B8 FFFF			   mov	   ax, -1 ; Socket already open
+    126	0072  EB 0D 90			   jmp	   @@L3
+    127	0075			     @@L1:
+    128	0075  3C FE			   cmp	   al,	0FEh
+    129	0077  75 06			   jne	   @@L2
+    130	0079  B8 FFFE			   mov	   ax, -2 ; Socket Table full
+    131	007C  EB 03 90			   jmp	   @@L3
+    132	007F			     @@L2:
+    133	007F  8B C2			   mov	   ax, dx
+    134	0081			     @@L3:
+    135					   POP_REGS
+1   136	0081  5F			pop	di
+1   137	0082  5E			pop	si
+1   138	0083  1F			pop	ds
+    139					   P_END
+1   140	0084  5D			pop	bp
+    141	0085  CB			   ret
+    142	0086			     ENDP
+    143
+    144	0086			     PROC  _IPXclose_socket;
+    145					   ARG	sock:WORD
+    146					   P_START
+1   147	0086  55			push	bp
+1   148	0087  8B EC			mov	bp, sp
+    149					   PUSH_REGS
+1   150	0089  1E			push	ds
+1   151	008A  56			push	si
+1   152	008B  57			push	di
+    153	008C  8B 56 06			   mov	   dx, [sock]
+    154	008F  BB 0000s			   mov	   bx, @data
+    155	0092  8E DB			   mov	   ds, bx
+    156	0094  BB 0001			   mov	   bx, 1
+    157	0097  FF 1E 0000r		   call	   [enterIPX]
+    158					   POP_REGS
+1   159	009B  5F			pop	di
+1   160	009C  5E			pop	si
+1   161	009D  1F			pop	ds
+    162					   P_END
+1   163	009E  5D			pop	bp
+    164	009F  CB			   ret
+    165	00A0			     ENDP
+    166
+    167	00A0			     PROC  _IPXlisten;
+    168					   ARG	ecb:DATAPTR
+    169					   P_START
+1   170	00A0  55			push	bp
+1   171	00A1  8B EC			mov	bp, sp
+Turbo Assembler	 Version 4.1	    09/02/22 15:19:49	    Page 4
+kern.asm
+
+
+
+    172					   PUSH_REGS
+1   173	00A3  1E			push	ds
+1   174	00A4  56			push	si
+1   175	00A5  57			push	di
+    176	00A6  C4 76 06			   les	   si, [ecb] ; Adresse ecb
+    177	00A9  BB 0000s			   mov	   bx, @data
+    178	00AC  8E DB			   mov	   ds, bx
+    179	00AE  BB 0004			   mov	   bx, 4
+    180	00B1  FF 1E 0000r		   call	   [enterIPX]
+    181					   POP_REGS
+1   182	00B5  5F			pop	di
+1   183	00B6  5E			pop	si
+1   184	00B7  1F			pop	ds
+    185					   P_END
+1   186	00B8  5D			pop	bp
+    187	00B9  B4 00			   mov	ah, 0
+    188	00BB  CB			   ret
+    189	00BC			     ENDP
+    190
+    191				     ;;	PROC  _asm_esr_routine;
+    192				     ;;	      push    bp;
+    193				     ;;	      PUSH_REGS;
+    194				     ;;	      mov     ax, @data
+    195				     ;;	      mov     ds, ax	 ;  FÅr	C PROGRAMM
+    196				     ;;	      push    es; Adressegment vom EBC
+    197				     ;;	      push    si; Adressoffset vom ECB
+    198				     ;;	      call    _esr_routine;  C ROUTINE
+    199				     ;;	      pop     si;
+    200				     ;;	      pop     es;
+    201				     ;;	      POP_REGS;
+    202				     ;;	      pop     bp;
+    203				     ;;	      cli   ; no Interrupt says	NOVELL
+    204				     ;;	      ret
+    205				     ;;	ENDP
+    206
+    207
+    208	00BC			     PROC  _Net_Call;
+    209					   ARG	   func:WORD, req:DATAPTR, repl:DATAPTR; Argumente
+    210	00BC  55			   push	   bp
+    211	00BD  8B EC			   mov	   bp, sp
+    212	00BF  8B 46 06			   mov	   ax, [func];
+    213	00C2  1E			   push	   ds;
+    214	00C3  56			   push	   si;
+    215	00C4  57			   push	   di;
+    216	00C5  9C			   pushf
+    217	00C6  C5 76 08			   lds	   si, [req]  ;	Request
+    218	00C9  C4 7E 0C			   les	   di, [repl] ;	Reply
+    219	00CC  CD 21			   int	   21h
+    220	00CE  9D			   popf
+    221	00CF  5F			   pop	   di;
+    222	00D0  5E			   pop	   si;
+    223	00D1  1F			   pop	   ds;
+    224	00D2  5D			   pop	   bp;
+    225	00D3  B4 00			   mov	   ah, 0
+    226	00D5  CB			   ret
+    227	00D6			     ENDP
+    228
+Turbo Assembler	 Version 4.1	    09/02/22 15:19:49	    Page 5
+kern.asm
+
+
+
+    229				     END
+Turbo Assembler	 Version 4.1	    09/02/22 15:19:49	    Page 6
+Symbol Table
+
+
+
+
+Symbol Name			  Type	 Value
+
+??DATE				  Text	 "09/02/22"
+??FILENAME			  Text	 "kern	  "
+??TIME				  Text	 "15:19:49"
+??VERSION			  Number 040A
+@32BIT				  Text	 0
+@@FERTIG			  Near	 KERN_TEXT:001F
+@@FERTIG			  Near	 KERN_TEXT:0050
+@@L1				  Near	 KERN_TEXT:0049
+@@L1				  Near	 KERN_TEXT:0075
+@@L2				  Near	 KERN_TEXT:004A
+@@L2				  Near	 KERN_TEXT:007F
+@@L3				  Near	 KERN_TEXT:0081
+@CODE				  Text	 KERN_TEXT
+@CODESIZE			  Text	 1
+@CPU				  Text	 0787H
+@CURSEG				  Text	 KERN_TEXT
+@DATA				  Text	 DGROUP
+@DATASIZE			  Text	 1
+@FILENAME			  Text	 KERN
+@INTERFACE			  Text	 000H
+@MODEL				  Text	 5
+@STACK				  Text	 DGROUP
+@WORDSIZE			  Text	 2
+ECB				  Number [DGROUP:BP+0006]
+ENTERIPX			  Dword	 DGROUP:0000
+FUNC				  Number [DGROUP:BP+0006]
+LIVE				  Number [DGROUP:BP+0008]
+NMBR				  Number [DGROUP:BP+000E]
+Q				  Number [DGROUP:BP+000A]
+REPL				  Number [DGROUP:BP+000C]
+REQ				  Number [DGROUP:BP+0008]
+SOCK				  Number [DGROUP:BP+0006]
+Z				  Number [DGROUP:BP+0006]
+_IPXCLOSE_SOCKET	       +  Far	 KERN_TEXT:0086
+(_IPXclose_socket)
+_IPXINIT (_IPXinit)		  Far	 KERN_TEXT:0000
+_IPXLISTEN (_IPXlisten)		  Far	 KERN_TEXT:00A0
+_IPXOPEN_SOCKET		       +  Far	 KERN_TEXT:0053
+(_IPXopen_socket)
+_NET_CALL (_Net_Call)		  Far	 KERN_TEXT:00BC
+_XMEMMOVE (_xmemmove)		  Far	 KERN_TEXT:0026
+
+Macro Name
+
+POP_REGS
+PUSH_REGS
+P_END
+P_START
+
+Groups & Segments		  Bit Size Align  Combine Class
+
+DGROUP				  Group
+  _DATA				  16  0004 Word	  Public  DATA
+KERN_TEXT			  16  00D6 Word	  Public  CODE
+
