@@ -1,0 +1,129 @@
+# Project: vc6qodem
+# Makefile created by Dev-C++ 5.11
+
+CPP      = g++.exe
+CC       = gcc.exe
+WINDRES  = windres.exe
+RES      = vc6qodem_private.res
+OBJ      = ../source/ansi.o ../source/atascii.o ../source/avatar.o ../source/codepage.o ../source/colors.o ../source/common.o ../source/console.o ../source/dialer.o ../source/emulation.o ../source/field.o ../source/forms.o ../source/help.o ../source/host.o ../source/input.o ../source/kermit.o ../source/keyboard.o ../source/modem.o ../source/music.o ../source/netclient.o ../source/options.o ../source/petscii.o ../source/phonebook.o ../source/protocols.o ../source/qodem.o ../source/screen.o ../source/script.o ../source/scrollback.o ../source/states.o ../source/translate.o ../source/vt100.o ../source/vt52.o ../source/xmodem.o ../source/zmodem.o $(RES)
+LINKOBJ  = ../source/ansi.o ../source/atascii.o ../source/avatar.o ../source/codepage.o ../source/colors.o ../source/common.o ../source/console.o ../source/dialer.o ../source/emulation.o ../source/field.o ../source/forms.o ../source/help.o ../source/host.o ../source/input.o ../source/kermit.o ../source/keyboard.o ../source/modem.o ../source/music.o ../source/netclient.o ../source/options.o ../source/petscii.o ../source/phonebook.o ../source/protocols.o ../source/qodem.o ../source/screen.o ../source/script.o ../source/scrollback.o ../source/states.o ../source/translate.o ../source/vt100.o ../source/vt52.o ../source/xmodem.o ../source/zmodem.o $(RES)
+LIBS     = -L"V:/PAPP/PortableApps/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib32" -static-libgcc -mwindows -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lodbc32 -lodbccp32 -lws2_32 -lnetapi32 -lshlwapi
+INCS     = -I"V:/PAPP/PortableApps/Dev-Cpp/MinGW64/include" -I"V:/PAPP/PortableApps/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"V:/PAPP/PortableApps/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"../lib/cryptlib" -I"../include" -I"../lib/pdcurses/include"
+CXXINCS  = -I"V:/PAPP/PortableApps/Dev-Cpp/MinGW64/include" -I"V:/PAPP/PortableApps/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"V:/PAPP/PortableApps/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"V:/PAPP/PortableApps/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include/c++" -I"../lib/cryptlib" -I"../include" -I"../lib/pdcurses/include"
+BIN      = vc6qodem.exe
+CXXFLAGS = $(CXXINCS) -D__GNUWIN32__ -mcpu=i386 -D_M_IX86=300 -W -DNDEBUG -DQ_PDCURSES -DQ_PDCURSES_WIN32 -DUNICODE -DWIN32 -D_WINDOWS -D_MBCS -DQ_SSH_CRYPTLIB -DSTATIC_LIB
+CFLAGS   = $(INCS) -D__GNUWIN32__ -mcpu=i386 -D_M_IX86=300 -W -DNDEBUG -DQ_PDCURSES -DQ_PDCURSES_WIN32 -DUNICODE -DWIN32 -D_WINDOWS -D_MBCS -DQ_SSH_CRYPTLIB -DSTATIC_LIB
+RM       = rm.exe -f
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before $(BIN) all-after
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CPP) $(LINKOBJ) -o $(BIN) $(LIBS)
+
+../source/ansi.o: ../source/ansi.c
+	$(CC) -c ../source/ansi.c -o ../source/ansi.o $(CFLAGS)
+
+../source/atascii.o: ../source/atascii.c
+	$(CC) -c ../source/atascii.c -o ../source/atascii.o $(CFLAGS)
+
+../source/avatar.o: ../source/avatar.c
+	$(CC) -c ../source/avatar.c -o ../source/avatar.o $(CFLAGS)
+
+../source/codepage.o: ../source/codepage.c
+	$(CC) -c ../source/codepage.c -o ../source/codepage.o $(CFLAGS)
+
+../source/colors.o: ../source/colors.c
+	$(CC) -c ../source/colors.c -o ../source/colors.o $(CFLAGS)
+
+../source/common.o: ../source/common.c
+	$(CC) -c ../source/common.c -o ../source/common.o $(CFLAGS)
+
+../source/console.o: ../source/console.c
+	$(CC) -c ../source/console.c -o ../source/console.o $(CFLAGS)
+
+../source/dialer.o: ../source/dialer.c
+	$(CC) -c ../source/dialer.c -o ../source/dialer.o $(CFLAGS)
+
+../source/emulation.o: ../source/emulation.c
+	$(CC) -c ../source/emulation.c -o ../source/emulation.o $(CFLAGS)
+
+../source/field.o: ../source/field.c
+	$(CC) -c ../source/field.c -o ../source/field.o $(CFLAGS)
+
+../source/forms.o: ../source/forms.c
+	$(CC) -c ../source/forms.c -o ../source/forms.o $(CFLAGS)
+
+../source/help.o: ../source/help.c
+	$(CC) -c ../source/help.c -o ../source/help.o $(CFLAGS)
+
+../source/host.o: ../source/host.c
+	$(CC) -c ../source/host.c -o ../source/host.o $(CFLAGS)
+
+../source/input.o: ../source/input.c
+	$(CC) -c ../source/input.c -o ../source/input.o $(CFLAGS)
+
+../source/kermit.o: ../source/kermit.c
+	$(CC) -c ../source/kermit.c -o ../source/kermit.o $(CFLAGS)
+
+../source/keyboard.o: ../source/keyboard.c
+	$(CC) -c ../source/keyboard.c -o ../source/keyboard.o $(CFLAGS)
+
+../source/modem.o: ../source/modem.c
+	$(CC) -c ../source/modem.c -o ../source/modem.o $(CFLAGS)
+
+../source/music.o: ../source/music.c
+	$(CC) -c ../source/music.c -o ../source/music.o $(CFLAGS)
+
+../source/netclient.o: ../source/netclient.c
+	$(CC) -c ../source/netclient.c -o ../source/netclient.o $(CFLAGS)
+
+../source/options.o: ../source/options.c
+	$(CC) -c ../source/options.c -o ../source/options.o $(CFLAGS)
+
+../source/petscii.o: ../source/petscii.c
+	$(CC) -c ../source/petscii.c -o ../source/petscii.o $(CFLAGS)
+
+../source/phonebook.o: ../source/phonebook.c
+	$(CC) -c ../source/phonebook.c -o ../source/phonebook.o $(CFLAGS)
+
+../source/protocols.o: ../source/protocols.c
+	$(CC) -c ../source/protocols.c -o ../source/protocols.o $(CFLAGS)
+
+../source/qodem.o: ../source/qodem.c
+	$(CC) -c ../source/qodem.c -o ../source/qodem.o $(CFLAGS)
+
+../source/screen.o: ../source/screen.c
+	$(CC) -c ../source/screen.c -o ../source/screen.o $(CFLAGS)
+
+../source/script.o: ../source/script.c
+	$(CC) -c ../source/script.c -o ../source/script.o $(CFLAGS)
+
+../source/scrollback.o: ../source/scrollback.c
+	$(CC) -c ../source/scrollback.c -o ../source/scrollback.o $(CFLAGS)
+
+../source/states.o: ../source/states.c
+	$(CC) -c ../source/states.c -o ../source/states.o $(CFLAGS)
+
+../source/translate.o: ../source/translate.c
+	$(CC) -c ../source/translate.c -o ../source/translate.o $(CFLAGS)
+
+../source/vt100.o: ../source/vt100.c
+	$(CC) -c ../source/vt100.c -o ../source/vt100.o $(CFLAGS)
+
+../source/vt52.o: ../source/vt52.c
+	$(CC) -c ../source/vt52.c -o ../source/vt52.o $(CFLAGS)
+
+../source/xmodem.o: ../source/xmodem.c
+	$(CC) -c ../source/xmodem.c -o ../source/xmodem.o $(CFLAGS)
+
+../source/zmodem.o: ../source/zmodem.c
+	$(CC) -c ../source/zmodem.c -o ../source/zmodem.o $(CFLAGS)
+
+vc6qodem_private.res: vc6qodem_private.rc ../build/win32/resources.rc
+	$(WINDRES) -i vc6qodem_private.rc --input-format=rc -o vc6qodem_private.res -O coff 
+

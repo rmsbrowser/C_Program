@@ -1,0 +1,489 @@
+[Project]
+FileName=U:\TOARCHIVE\C_Program\qodem\vc6qodem\vc6qodem.dev
+Name=vc6qodem
+Ver=2
+IsCpp=1
+Type=0
+Compiler=-D__GNUWIN32__ -mcpu=i386 -D_M_IX86=300 -W -DNDEBUG -DQ_PDCURSES -DQ_PDCURSES_WIN32 -DUNICODE -DWIN32 -D_WINDOWS -D_MBCS -DQ_SSH_CRYPTLIB -DSTATIC_LIB 
+CppCompiler=-D__GNUWIN32__ -mcpu=i386 -D_M_IX86=300 -W -DNDEBUG -DQ_PDCURSES -DQ_PDCURSES_WIN32 -DUNICODE -DWIN32 -D_WINDOWS -D_MBCS -DQ_SSH_CRYPTLIB -DSTATIC_LIB 
+Includes=../lib/cryptlib;../include;../lib/pdcurses/include
+Linker=-lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lodbc32 -lodbccp32 -lws2_32 -lnetapi32 -lshlwapi 
+Libs=
+UnitCount=68
+Folders="Source Files","Header Files","Resource Files"
+[Unit1]
+FileName=../source/ansi.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit2]
+FileName=../source/atascii.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit3]
+FileName=../source/avatar.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit4]
+FileName=../source/codepage.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit5]
+FileName=../source/colors.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit6]
+FileName=../source/common.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit7]
+FileName=../source/console.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit8]
+FileName=../source/dialer.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit9]
+FileName=../source/emulation.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit10]
+FileName=../source/field.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit11]
+FileName=../source/forms.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit12]
+FileName=../source/help.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit13]
+FileName=../source/host.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit14]
+FileName=../source/input.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit15]
+FileName=../source/kermit.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit16]
+FileName=../source/keyboard.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit17]
+FileName=../source/modem.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit18]
+FileName=../source/music.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit19]
+FileName=../source/netclient.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit20]
+FileName=../source/options.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit21]
+FileName=../source/petscii.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit22]
+FileName=../source/phonebook.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit23]
+FileName=../source/protocols.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit24]
+FileName=../source/qodem.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit25]
+FileName=../build/win32/resources.rc
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=0
+Priority=1000
+[Unit26]
+FileName=../source/screen.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit27]
+FileName=../source/script.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit28]
+FileName=../source/scrollback.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit29]
+FileName=../source/states.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit30]
+FileName=../source/translate.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit31]
+FileName=../source/vt100.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit32]
+FileName=../source/vt52.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit33]
+FileName=../source/xmodem.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit34]
+FileName=../source/zmodem.c
+Folder="Source Files"
+Compile=1
+CompileCpp=0
+Link=1
+Priority=1000
+[Unit35]
+FileName=../source/ansi.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit36]
+FileName=../source/atascii.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit37]
+FileName=../source/avatar.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit38]
+FileName=../source/codepage.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit39]
+FileName=../source/colors.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit40]
+FileName=../source/common.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit41]
+FileName=../source/console.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit42]
+FileName=../source/dialer.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit43]
+FileName=../source/emulation.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit44]
+FileName=../source/field.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit45]
+FileName=../source/forms.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit46]
+FileName=../source/help.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit47]
+FileName=../source/host.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit48]
+FileName=../source/input.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit49]
+FileName=../source/kermit.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit50]
+FileName=../source/keyboard.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit51]
+FileName=../source/modem.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit52]
+FileName=../source/music.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit53]
+FileName=../source/netclient.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit54]
+FileName=../source/options.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit55]
+FileName=../source/petscii.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit56]
+FileName=../source/phonebook.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit57]
+FileName=../source/protocols.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit58]
+FileName=../source/qcurses.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit59]
+FileName=../source/qodem.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit60]
+FileName=../source/screen.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit61]
+FileName=../source/script.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit62]
+FileName=../source/scrollback.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit63]
+FileName=../source/states.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit64]
+FileName=../source/translate.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit65]
+FileName=../source/vt100.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit66]
+FileName=../source/vt52.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit67]
+FileName=../source/xmodem.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+[Unit68]
+FileName=../source/zmodem.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
